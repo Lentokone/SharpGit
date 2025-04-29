@@ -1,75 +1,86 @@
-﻿using System;
-//Console.WriteLine("Hello, World!");
+﻿using LibGit2Sharp;
+using System;
+using System.Threading.Tasks;
+using System.CommandLine;
+using System.CommandLine.Invocation;
 
-
-//// Eli se libgit2sharp
-//// Ja ssh
-//// Ja auth tarkistus mvc puolelle
+////! Eli se libgit2sharp
+////! Ja ssh
+////! Ja auth tarkistus mvc puolelle
 
 //// Kun on pushaamassa, lähettää ennen sitä jonkun viestin mvc puolelle, joka tekee sen git init --bare puolen
 
 //// Vaikka git remote add kohdassa voisi tehdä sen auth jutun ja tag se local repo jotenkin että se tietää että on auth kontsa
 
-//string[] options = { "Init", "Clone", "Commit", "Push", "Pull" };
-//int index = 0;
 
-//ConsoleKey key;
-//do
-//{
-//    Console.Clear();
-//    for (int i = 0; i < options.Length; i++)
-//    {
-//        if (i == index)
-//        {
-//            Console.BackgroundColor = ConsoleColor.Gray;
-//            Console.ForegroundColor = ConsoleColor.Black;
-//        }
+namespace SharpGit;
 
-//        Console.WriteLine(options[i]);
-//        Console.ResetColor();
-//    }
-
-//    key = Console.ReadKey(true).Key;
-
-//    if (key == ConsoleKey.UpArrow)
-//        index = (index == 0) ? options.Length - 1 : index - 1;
-//    else if (key == ConsoleKey.DownArrow)
-//        index = (index + 1) % options.Length;
-
-//} while (key != ConsoleKey.Enter);
-
-//Console.WriteLine($"You selected: {options[index]}");
-
-
-namespace ComLineArg
+class Program
 {
-    class Geeks
+    static async Task<int> Main(string[] args)
     {
+        var rootCommand = new RootCommand("SharpGit CLI - a minimal git-like tool");
 
-        // Main Method which accepts the 
-        // command line arguments as  
-        // string type parameters   
-        static void Main(string[] args)
-        {
+        // init
+        var initCommand = new Command("init", "Initialize a new repository");
+        initCommand.SetHandler(() => {
+            Console.WriteLine("Init command called");
+        });
 
-            // To check the length of  
-            // Command line arguments   
-            if (args.Length > 0)
-            {
-                Console.WriteLine("Arguments Passed by the Programmer:");
+        // add
+        var addCommand = new Command("add", "Add files to staging area");
+        var addPathArg = new Argument<string>("path", "Path to file or directory");
+        addCommand.AddArgument(addPathArg);
+        addCommand.SetHandler((string path) => {
+            Console.WriteLine($"Add command called with path: {path}");
+        }, addPathArg);
 
-                // To print the command line  
-                // arguments using foreach loop 
-                foreach (Object obj in args)
-                {
-                    Console.WriteLine(obj);
-                }
-            }
+        // commit
+        var commitCommand = new Command("commit", "Record changes to the repository");
+        var messageOption = new Option<string>(
+            name: "--message",
+            description: "Commit message"
+        );
+        commitCommand.AddOption(messageOption);
+        commitCommand.SetHandler((string message) => {
+            Console.WriteLine($"Commit command called with message: {message}");
+        }, messageOption);
 
-            else
-            {
-                Console.WriteLine("No command line arguments found.");
-            }
-        }
+        // clone
+        var cloneCommand = new Command("clone", "Clone a repository");
+        var repoUrlArg = new Argument<string>("url", "Repository URL");
+        cloneCommand.AddArgument(repoUrlArg);
+        cloneCommand.SetHandler((string url) => {
+            Console.WriteLine($"Clone command called for: {url}");
+        }, repoUrlArg);
+
+        // push
+        var pushCommand = new Command("push", "Push changes to remote");
+        pushCommand.SetHandler(() => {
+            Console.WriteLine("Push command called");
+        });
+
+        // pull
+        var pullCommand = new Command("pull", "Pull changes from remote");
+        pullCommand.SetHandler(() => {
+            Console.WriteLine("Pull command called");
+        });
+
+        // status
+        var statusCommand = new Command("status", "Show the working tree status");
+        statusCommand.SetHandler(() => {
+            Console.WriteLine("Status command called");
+        });
+
+        // Add all to root
+        rootCommand.AddCommand(initCommand);
+        rootCommand.AddCommand(addCommand);
+        rootCommand.AddCommand(commitCommand);
+        rootCommand.AddCommand(cloneCommand);
+        rootCommand.AddCommand(pushCommand);
+        rootCommand.AddCommand(pullCommand);
+        rootCommand.AddCommand(statusCommand);
+
+        return await rootCommand.InvokeAsync(args);
     }
 }
