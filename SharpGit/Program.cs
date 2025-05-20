@@ -13,7 +13,37 @@ using SharpGit.Classes;
 
 //// Vaikka git remote add kohdassa voisi tehdä sen auth jutun ja tag se local repo jotenkin että se tietää että on auth kontsa
 
+//TODO Muista ottaa nuo writelinet pois
 
+
+// Nonni
+// Vähän ajatuksia tänne, etten unohda.
+// Eli tässä tulee myös login
+// Kun clone, push,pull jne. niin se kysyy käyttäjätunnuksen ja salasanan.
+// Lähetetään se MVC endpoint, joka palauttaa ssh key ja short lived token
+// Ja se tallennetaan johonkin, että ei tarvi joka kerta kysyä.
+
+// Kun on action time, se tarkistaa tokenin ja sitten tekee magiaa
+
+// Eli tulen tarviimaan jonkinsorting .sharpgit, johon tallennetaan ssh keyt ja config.json
+// Joka on muotoa. ---
+
+/*
+{
+  "monkey": {
+    "username": "veijari",
+    "token": "token_for_monkey",
+    "token_expires": "2025-05-22T01:00:00Z",
+    "ssh_key_path": "/home/user/.sharpgit/keys/monkey"
+  },
+  "giraffe": {
+    "username": "veijari",
+    "token": "token_for_giraffe",
+    "token_expires": "2025-05-24T01:00:00Z",
+    "ssh_key_path": "/home/user/.sharpgit/keys/giraffe"
+  }
+}
+*/
 namespace SharpGit;
 
 class Program
@@ -80,6 +110,7 @@ class Program
         var pushCommand = new Command("push", "Push changes to remote");
         pushCommand.SetHandler(() => {
             Console.WriteLine("Push command called");
+            GitService.PushToRepo();
         });
 
         // pull
@@ -95,14 +126,22 @@ class Program
             string test = Directory.GetCurrentDirectory();
             var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
             var status = repo.RetrieveStatus();
-
-            GitService.DisplayGitStatus(repo); // Display the status of the repository
+            if (repo != null)
+            {
+                GitService.DisplayGitStatus(repo); // Display the status of the repository
+            }
 
         });
         // status
         var logCommand = new Command("log", "Show the commit tree");
         logCommand.SetHandler(() => {
             Console.WriteLine("Log command called");
+        });
+        
+        // status
+        var SetRemoteCommand = new Command("remote", "Set the remote destination of the repository");
+        SetRemoteCommand.SetHandler(() => {
+            Console.WriteLine("Set Remote command called");
         });
 
         // Add all to root
@@ -114,6 +153,7 @@ class Program
         rootCommand.AddCommand(pullCommand);
         rootCommand.AddCommand(statusCommand);
         rootCommand.AddCommand(logCommand);
+        rootCommand.AddCommand(SetRemoteCommand);
 
         return await rootCommand.InvokeAsync(args);
     }
