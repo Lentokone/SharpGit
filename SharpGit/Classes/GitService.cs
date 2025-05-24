@@ -1,6 +1,7 @@
 ﻿using LibGit2Sharp;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,52 +22,154 @@ namespace SharpGit.Classes
         // Ja pilkkoo sen urlin. Esimerkillä tämän projektin repo "https://github.com/Lentokone/FSWADP_Console_side"
         // Muuttaa sen kunnolliseen remotePath muotoon.
         // "kayttis@server:/home/kayttis/shubrepos/Lentokone/FSWADP..."
-        public static void SetRemoteRepo()
+        public static void AddToRepo(Repository repo)
         {
-            // Local repo path (not bare)
-            var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
-
-            //welho@192.168.1.114:/home/welho/sUPERTEST/SharGitRepo
-            //Tuossa on oman palvelimen osoite, joka sitten kulkee ssh yhteydellä.
-            // Remote repo path (the bare repo)
-            string remotePath = "file:///C:/FULLSTACK_WEBDEV_FSWDAP/heha.git";
-
-            if (repo == null)
+            try
             {
-                Console.WriteLine("No repository found in the current directory.");
-                return;
+
             }
-            // Add remote if it doesn't exist yet
-            if (repo.Network.Remotes["origin"] == null)
+            catch (Exception ex)
             {
-                repo.Network.Remotes.Add("origin", remotePath);
-                Console.WriteLine("Testermaan");
-            }            
-        }
-
-        public static void PushToRepo()
-        {
-            var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
-
-            
-            // Set up push options (no credentials needed for local)
-            var pushOptions = new PushOptions();
-
-            if (repo == null)
-            {
-                Console.WriteLine("No repository found in the current directory.");
-                return;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Add failed: {ex.Message}");
+                Console.ResetColor();
             }
-            // Push current branch to origin
-            var branch = repo.Branches["main"] ?? repo.Branches["master"];
-            repo.Network.Push(branch, pushOptions);
         }
 
-        public static void PullFromRepo()
+        // TODO TÄMÄ ON VIELÄ KESKEN
+        // Puuttuu oikea signature ja muut
+        // Ne pitää hakea jonkin sortin config.json tiedostosta
+        public static void CommitToRepo(Repository repo, string message)
         {
+            try
+            {
+                // Write content to file system
+                var content = "Commit this!";
+                File.WriteAllText(Path.Combine(repo.Info.WorkingDirectory, "fileToCommit.txt"), content);
 
+                // Stage the file
+                repo.Index.Add("fileToCommit.txt");
+                repo.Index.Write();
+
+                // Create the committer's signature and commit
+                Signature author = new Signature("James", "@jugglingnutcase", DateTime.Now);
+                Signature committer = author;
+
+                // Commit to the repository
+                Commit commit = repo.Commit("Here's a commit i made!", author, committer);
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Commit failed: {ex.Message}");
+                Console.ResetColor();
+            }
         }
 
+        public static void CloneRepo(string remotePath)
+        {
+            try
+            {
+                Repository.Clone(remotePath, "MyClonedRepo");
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Clone failed: {ex.Message}");
+                Console.ResetColor();
+            }
+        }
+        
+        public static void CloneRepo(string remotePath, string givenPath)
+        {
+            try
+            {
+                Repository.Clone(remotePath, givenPath);
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Clone failed: {ex.Message}");
+                Console.ResetColor();
+            }
+        }
+
+        public static void PushToRepo(Repository repo)
+        {
+            try
+            {
+                // Set up push options (no credentials needed for local)
+                var pushOptions = new PushOptions();
+
+                if (repo == null)
+                {
+                    Console.WriteLine("No repository found in the current directory.");
+                    return;
+                }
+                // Push current branch to origin
+                var branch = repo.Branches["main"] ?? repo.Branches["master"];
+                repo.Network.Push(branch, pushOptions);
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Push failed: {ex.Message}");
+                Console.ResetColor();
+            }
+        }
+
+        // Ei ole testattu
+        public static void PullFromRepo(Repository repo)
+        {
+            try
+            {
+                var pullOptions = new PullOptions
+                {
+                    FetchOptions = new FetchOptions
+                    {
+                        // Muista lisätä tänne ssh avain hommat ja muut
+                    }
+                };
+                if (repo == null)
+                {
+                    Console.WriteLine("No repository found in the current directory.");
+                    return;
+                }
+
+                var signature = new LibGit2Sharp.Signature(
+                    new Identity("MERGE_USER_NAME", "MERGE_USER_EMAIL"), DateTimeOffset.Now);
+                // Pull from the remote repository
+                var result = Commands.Pull(repo, signature, pullOptions);
+
+                if (result.Status == MergeStatus.Conflicts)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Merge conflicts detected! Please resolve them manually.");
+                    Console.ResetColor();
+
+                    // Optionally: List conflicted files-
+                    foreach (var conflict in repo.Index.Conflicts)
+                    {
+                        string path = conflict.Ours?.Path ?? conflict.Theirs?.Path ?? conflict.Ancestor?.Path ?? "(unknown path)";
+                        Console.WriteLine($"Conflict in file: {path}");
+                    }
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Pull successful! No merge conflicts.");
+                    Console.ResetColor();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Pull failed: {ex.Message}");
+                Console.ResetColor();
+            }
+        }
+
+        // TODO VÄRIT PUUTTUU
         public static void DisplayGitStatus(Repository repo)
         {
             try
@@ -90,7 +193,7 @@ namespace SharpGit.Classes
                 if (itemStatusesList.Any(s => s.Contains("NewInIndex") || s.Contains("ModifiedInIndex") || s.Contains("RenamedInIndex") || s.Contains("DeletedFromIndex")))
                 {
                     Console.WriteLine("\nChanges to be committed:");
-                    
+
                     foreach (var item in statuses)
                     {
                         if ((item.State & (FileStatus.NewInIndex | FileStatus.ModifiedInIndex | FileStatus.RenamedInIndex | FileStatus.DeletedFromIndex)) != 0)
@@ -100,7 +203,7 @@ namespace SharpGit.Classes
                     }
                 }
 
-                if (itemStatusesList.Any(s => s.Contains("NewInIndex") || s.Contains("ModifiedInIndex") || s.Contains("RenamedInIndex") || s.Contains("DeletedFromIndex")))
+                if (itemStatusesList.Any(s => s.Contains("NewInIndex") || s.Contains("ModifiedInIndex") || s.Contains("ModifiedInWorkdir") || s.Contains("RenamedInIndex") || s.Contains("DeletedFromIndex")))
                 {
                     // Changes not staged for commit
                     Console.WriteLine("\nChanges not staged for commit:");
@@ -110,13 +213,14 @@ namespace SharpGit.Classes
                     {
                         if ((item.State & FileStatus.ModifiedInWorkdir) != 0)
                         {
-                            
+
                             Console.WriteLine($"        modified:   {item.FilePath}");
                         }
                     }
                     Console.WriteLine();
+                    Console.WriteLine("no changes added to commit (use \"git add\" and/or \"git commit -a\")");
                 }
-                
+
                 if (itemStatusesList.Any(s => s.Contains("NewInWorkdir")))
                 {
                     // Untracked files
@@ -131,11 +235,57 @@ namespace SharpGit.Classes
                     }
                     Console.WriteLine();
                 }
+                if (!itemStatusesList.Any(s =>
+                            s.Contains("NewInIndex") ||
+                            s.Contains("ModifiedInIndex") ||
+                            s.Contains("RenamedInIndex") ||
+                            s.Contains("DeletedFromIndex") ||
+                            s.Contains("ModifiedInWorkdir") ||
+                            s.Contains("NewInWorkdir")))
+                {
+                    Console.WriteLine("nothing to commit, working tree clean");
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Error retrieving status: " + ex.Message);
             }
+        }
+
+        public static void DisplayLog(Repository repo)
+        {
+            try
+            {
+
+            }
+            catch
+            (Exception ex)
+            {
+                Console.WriteLine("Error retrieving log: " + ex.Message);
+            }
+        }
+        //! This is for testing only.
+        public static void SetRemoteRepo()
+        {
+            // Local repo path (not bare)
+            var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
+
+            //welho@192.168.1.114:/home/welho/sUPERTEST/SharGitRepo
+            //Tuossa on oman palvelimen osoite, joka sitten kulkee ssh yhteydellä.
+            // Remote repo path (the bare repo)
+            string remotePath = "file:///C:/FULLSTACK_WEBDEV_FSWDAP/heha.git";
+
+            if (repo == null)
+            {
+                Console.WriteLine("No repository found in the current directory.");
+                return;
+            }
+            // Add remote if it doesn't exist yet
+            if (repo.Network.Remotes["origin"] == null)
+            {
+                repo.Network.Remotes.Add("origin", remotePath);
+                Console.WriteLine("Testermaan");
+            }            
         }
     }
 }

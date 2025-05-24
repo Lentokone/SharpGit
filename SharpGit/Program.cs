@@ -62,6 +62,7 @@ class Program
         var initCommand = new Command("init", "Initialize a new repository");
         initCommand.SetHandler(() => {
             Console.WriteLine("Init command called");
+
             GitService.InitRepo();
         });
 
@@ -93,55 +94,97 @@ class Program
             name: "--message",
             description: "Commit message"
         );
+        messageOption.AddAlias("-m");
         commitCommand.AddOption(messageOption);
         commitCommand.SetHandler((string message) => {
             Console.WriteLine($"Commit command called with message: {message}");
+
+            var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
+            if (repo == null)
+            {
+                Console.WriteLine("No repository found in the current directory.");
+                return;
+            }
+            Console.WriteLine($"{message}");
+            //GitService.CommitChanges(repo, message);
         }, messageOption);
 
         // clone
+        // KESKEN
+        // KESKEN
+        // KESKEN
         var cloneCommand = new Command("clone", "Clone a repository");
         var repoUrlArg = new Argument<string>("url", "Repository URL");
+        var targetDirArg = new Argument<string>("path", () => null, "Target directory (optional)");
         cloneCommand.AddArgument(repoUrlArg);
-        cloneCommand.SetHandler((string url) => {
+        cloneCommand.AddArgument(targetDirArg);
+        cloneCommand.SetHandler((string url, string? path) => {
             Console.WriteLine($"Clone command called for: {url}");
-        }, repoUrlArg);
+
+            var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
+            if (repo == null)
+            {
+                GitService.CloneRepo(url);
+                return;
+            }
+            Console.WriteLine("Can not clone to current directory. Current directory is not empty.");
+        }, repoUrlArg, targetDirArg);
 
         // push
         var pushCommand = new Command("push", "Push changes to remote");
         pushCommand.SetHandler(() => {
             Console.WriteLine("Push command called");
-            GitService.PushToRepo();
+            
+            var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
+            if (repo == null)
+            {
+                Console.WriteLine("No repository found in the current directory.");
+                return;
+            }
+            GitService.PushToRepo(repo);
         });
 
         // pull
         var pullCommand = new Command("pull", "Pull changes from remote");
         pullCommand.SetHandler(() => {
             Console.WriteLine("Pull command called");
+
+            var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
+            if (repo == null)
+            {
+                Console.WriteLine("No repository found in the current directory.");
+                return;
+            }
+            Console.WriteLine("Elä samperi vielä kokeile");
+            //GitService.PullFromRepo(repo);
         });
 
         // status
         var statusCommand = new Command("status", "Show the working tree status");
         statusCommand.SetHandler(() => {
             Console.WriteLine("Status command called");
-            string test = Directory.GetCurrentDirectory();
-            var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
-            var status = repo.RetrieveStatus();
-            if (repo != null)
-            {
-                GitService.DisplayGitStatus(repo); // Display the status of the repository
-            }
 
+            var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
+            if (repo == null)
+            {
+                Console.WriteLine("No repository found in the current directory.");
+                return;
+            }
+            GitService.DisplayGitStatus(repo); // Display the status of the repository
         });
-        // status
+
+        // log
         var logCommand = new Command("log", "Show the commit tree");
         logCommand.SetHandler(() => {
             Console.WriteLine("Log command called");
+
         });
         
-        // status
+        // remote
         var SetRemoteCommand = new Command("remote", "Set the remote destination of the repository");
         SetRemoteCommand.SetHandler(() => {
             Console.WriteLine("Set Remote command called");
+
         });
 
         // Add all to root
