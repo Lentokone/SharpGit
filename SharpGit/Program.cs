@@ -75,13 +75,11 @@ class Program
 
         addCommand.SetHandler((bool update, IEnumerable<string> paths) =>
         {
-            // Handle the update option
             if (update)
             {
                 Console.WriteLine("Using '--update' or '-u' to stage modified and deleted files.");
             }
 
-            // Handle paths (files or directories)
             foreach (var path in paths)
             {
                 Console.WriteLine($"Adding file or directory: {path}");
@@ -115,7 +113,7 @@ class Program
         // KESKEN
         var cloneCommand = new Command("clone", "Clone a repository");
         var repoUrlArg = new Argument<string>("url", "Repository URL");
-        var targetDirArg = new Argument<string>("path", () => null, "Target directory (optional)");
+        var targetDirArg = new Argument<string?>("path", () => null, "Target directory (optional)");
         cloneCommand.AddArgument(repoUrlArg);
         cloneCommand.AddArgument(targetDirArg);
         cloneCommand.SetHandler((string url, string? path) => {
@@ -124,7 +122,7 @@ class Program
             var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
             if (repo == null)
             {
-                GitService.CloneRepo(url);
+                GitService.CloneRepo(url, path);
                 return;
             }
             Console.WriteLine("Can not clone to current directory. Current directory is not empty.");
@@ -175,10 +173,19 @@ class Program
 
         // log
         var logCommand = new Command("log", "Show the commit tree");
-        logCommand.SetHandler(() => {
+        var logLengthArgument = new Argument<int>("length", () => 15, "Length of displayed commit log");
+        logCommand.AddArgument(logLengthArgument);
+        logCommand.SetHandler((int length) => {
             Console.WriteLine("Log command called");
 
-        });
+            var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
+            if (repo == null)
+            {
+                Console.WriteLine("No repository found in the current directory.");
+                return;
+            }
+            GitService.DisplayLog(repo, length);
+        }, logLengthArgument);
         
         // remote
         var SetRemoteCommand = new Command("remote", "Set the remote destination of the repository");
