@@ -52,11 +52,7 @@ class Program
     {
         var rootCommand = new RootCommand("SharpGit CLI - a minimal git-like tool");
 
-        var updateOption = new Option<bool>(
-            name: "--update",
-            description: "Update the local repository"
-        );
-        updateOption.AddAlias("-u"); // Short form
+        
 
         // init
         var initCommand = new Command("init", "Initialize a new repository");
@@ -68,6 +64,11 @@ class Program
 
         // add
         var addCommand = new Command("add", "Add files to staging area");
+        var updateOption = new Option<bool>(
+            name: "--update",
+            description: "Update the local repository"
+        );
+        updateOption.AddAlias("-u");
         var addPathArg = new Argument<IEnumerable<string>>("path", "Path to file or directory");
 
         addCommand.AddOption(updateOption);
@@ -75,14 +76,22 @@ class Program
 
         addCommand.SetHandler((bool update, IEnumerable<string> paths) =>
         {
+            var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
+            if (repo == null)
+            {
+                return;
+            }
+            // GitService.AddToRepo(url, path);
             if (update)
             {
                 Console.WriteLine("Using '--update' or '-u' to stage modified and deleted files.");
+                GitService.AddToRepoUpdate(repo);
             }
 
             foreach (var path in paths)
             {
                 Console.WriteLine($"Adding file or directory: {path}");
+                GitService.AddToRepo(repo, path);
             }
         }, updateOption, addPathArg);
 

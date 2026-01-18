@@ -23,11 +23,26 @@ namespace SharpGit.Classes
         // Ja pilkkoo sen urlin. Esimerkillä tämän projektin repo "https://github.com/Lentokone/FSWADP_Console_side"
         // Muuttaa sen kunnolliseen remotePath muotoon.
         // "kayttis@server:/home/kayttis/shubrepos/Lentokone/FSWADP..."
-        public static void AddToRepo(Repository repo)
+        public static void AddToRepo(Repository repo, string filePath)
         {
             try
             {
+                repo.Index.Add(filePath);
+                repo.Index.Write();
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Add failed: {ex.Message}");
+                Console.ResetColor();
+            }
+        }
 
+        public static void AddToRepoUpdate(Repository repo)
+        {
+            try
+            {
+                Commands.Stage(repo, "*");
             }
             catch (Exception ex)
             {
