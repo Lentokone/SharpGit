@@ -27,10 +27,8 @@ namespace SharpGit.Classes
                 {
                     return new Repository(dir.FullName);
                 }
-
                 dir = dir.Parent;
             }
-
             return null;
         }
     }

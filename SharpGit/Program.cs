@@ -55,10 +55,10 @@ class Program
         
 
         // init
-        var initCommand = new Command("init", "Initialize a new repository");
+        var initCommand = new Command("init", "Initialize a new repository. Unsupported for now.");
         initCommand.SetHandler(() => {
             Console.WriteLine("Init command called");
-
+            Console.WriteLine("This is still unsupported.");
             GitService.InitRepo();
         });
 
@@ -127,13 +127,13 @@ class Program
         cloneCommand.AddArgument(targetDirArg);
         cloneCommand.SetHandler((string url, string? path) => {
             Console.WriteLine($"Clone command called for: {url}");
+            GitService.CloneRepo(url, path);
 
-            var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
-            if (repo == null)
-            {
-                GitService.CloneRepo(url, path);
-                return;
-            }
+            // var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
+            // if (repo == null)
+            // {
+            //     return;
+            // }
             Console.WriteLine("Can not clone to current directory. Current directory is not empty.");
         }, repoUrlArg, targetDirArg);
 
@@ -163,7 +163,7 @@ class Program
                 return;
             }
             Console.WriteLine("Elä samperi vielä kokeile");
-            //GitService.PullFromRepo(repo);
+            GitService.PullFromRepo(repo);
         });
 
         // status
@@ -197,9 +197,10 @@ class Program
         }, logLengthArgument);
         
         // remote
-        var SetRemoteCommand = new Command("remote", "Set the remote destination of the repository");
+        var SetRemoteCommand = new Command("remote", "Set the remote destination of the repository. Currently not supported");
         SetRemoteCommand.SetHandler(() => {
             Console.WriteLine("Set Remote command called");
+            Console.WriteLine("This is currently not supported");
 
         });
 

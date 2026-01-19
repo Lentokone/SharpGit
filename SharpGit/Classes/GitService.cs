@@ -100,7 +100,8 @@ namespace SharpGit.Classes
         {
             try
             {
-                Repository.Clone(remotePath, givenPath);
+                var targetDir = givenPath ?? Directory.GetCurrentDirectory();
+                Repository.Clone(remotePath, targetDir);
             }
             catch (Exception ex)
             {
@@ -114,7 +115,6 @@ namespace SharpGit.Classes
         {
             try
             {
-                // Set up push options (no credentials needed for local)
                 var pushOptions = new PushOptions();
 
                 if (repo == null)
@@ -122,7 +122,6 @@ namespace SharpGit.Classes
                     Console.WriteLine("No repository found in the current directory.");
                     return;
                 }
-                // Push current branch to origin
                 var branch = repo.Branches["main"] ?? repo.Branches["master"];
                 repo.Network.Push(branch, pushOptions);
             }
@@ -135,6 +134,7 @@ namespace SharpGit.Classes
         }
 
         // Ei ole testattu
+        // 19/01/ 22:25, testattu, toimii
         public static void PullFromRepo(Repository repo)
         {
             try
@@ -163,9 +163,11 @@ namespace SharpGit.Classes
                     Console.WriteLine("Merge conflicts detected! Please resolve them manually.");
                     Console.ResetColor();
 
+                    Console.WriteLine(repo.Index.Conflicts.Any());
                     // Optionally: List conflicted files-
                     foreach (var conflict in repo.Index.Conflicts)
                     {
+                        Console.WriteLine("Ttest");
                         string path = conflict.Ours?.Path ?? conflict.Theirs?.Path ?? conflict.Ancestor?.Path ?? "(unknown path)";
                         Console.WriteLine($"Conflict in file: {path}");
                     }
@@ -197,7 +199,19 @@ namespace SharpGit.Classes
                 // Separate modified and untracked files
                 var statusOptions = new StatusOptions();
                 var statuses = repo.RetrieveStatus(statusOptions);
-
+                var details = repo.Head.TrackingDetails;
+                Console.WriteLine(details.BehindBy);
+                Console.WriteLine(details.AheadBy);
+                Console.WriteLine($"Testing {details.AheadBy}");
+                if (details.BehindBy < 0)
+                {
+                    Console.WriteLine($"Your branch is behind {branchName} by {details.BehindBy} commit, and can be fast-forwarded. (use sharpgit pull to update your local branch)");
+                }
+                if (details.AheadBy < 0)
+                {
+                    Console.WriteLine($"Your branch is ahead {branchName} by {details.BehindBy} commit, and can be fast-forwarded.\n ŋµŋµ(use sharpgit pull to update your local branch)");
+                }
+                Console.WriteLine($"Your branch is behind {branchName} by {details.BehindBy} commit, and can be fast-forwarded. (use sharpgit pull to update your local branch)");
                 var itemStatusesList = new List<string>();
 
                 foreach (var item in statuses)
