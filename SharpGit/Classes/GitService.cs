@@ -82,26 +82,24 @@ namespace SharpGit.Classes
             }
         }
 
-        public static void CloneRepo(string remotePath)
-        {
-            try
-            {
-                Repository.Clone(remotePath, "MyClonedRepo");
-            }
-            catch (Exception ex)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Clone failed: {ex.Message}");
-                Console.ResetColor();
-            }
-        }
-        
         public static void CloneRepo(string remotePath, string? givenPath)
         {
             try
             {
+                // Tähän se että se tekee directory sille repository
+                // Jepjep. Nyt on aika testata throttleeko tämäkin paska.
                 var targetDir = givenPath ?? Directory.GetCurrentDirectory();
-                Repository.Clone(remotePath, targetDir);
+                var directoryName = remotePath.TrimEnd('/').Split('/').Last();
+
+                if (directoryName.EndsWith(".git"))
+                {
+                    directoryName = directoryName[..^4];
+                }
+
+                Console.WriteLine(directoryName);
+                var fullDirectory = Path.Combine(targetDir, directoryName);
+                Directory.CreateDirectory(fullDirectory);
+                Repository.Clone(remotePath, fullDirectory);
             }
             catch (Exception ex)
             {

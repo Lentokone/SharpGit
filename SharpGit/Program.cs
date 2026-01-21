@@ -118,7 +118,7 @@ class Program
 
         // clone
         // KESKEN
-        // KESKEN
+        // KESKEN Paska vitun c# ja roslyn
         // KESKEN
         var cloneCommand = new Command("clone", "Clone a repository");
         var repoUrlArg = new Argument<string>("url", "Repository URL");
