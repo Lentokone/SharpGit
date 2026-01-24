@@ -60,19 +60,19 @@ namespace SharpGit.Classes
             try
             {
                 // Write content to file system
-                var content = "Commit this!";
-                File.WriteAllText(Path.Combine(repo.Info.WorkingDirectory, "fileToCommit.txt"), content);
+                //var content = "Commit this!";
+                //File.WriteAllText(Path.Combine(repo.Info.WorkingDirectory, "fileToCommit.txt"), content);
 
                 // Stage the file
-                repo.Index.Add("fileToCommit.txt");
-                repo.Index.Write();
+                //repo.Index.Add("fileToCommit.txt");
+                //repo.Index.Write();
 
                 // Create the committer's signature and commit
                 Signature author = new Signature("James", "@jugglingnutcase", DateTime.Now);
                 Signature committer = author;
 
                 // Commit to the repository
-                Commit commit = repo.Commit("Here's a commit i made!", author, committer);
+                Commit commit = repo.Commit(message, author, committer);
             }
             catch (Exception ex)
             {
@@ -152,20 +152,23 @@ namespace SharpGit.Classes
 
                 var signature = new LibGit2Sharp.Signature(
                     new Identity("MERGE_USER_NAME", "MERGE_USER_EMAIL"), DateTimeOffset.Now);
-                // Pull from the remote repository
+
                 var result = Commands.Pull(repo, signature, pullOptions);
 
+                // This will never be triggered.
+                // The "Commands.Pull()", throws an unhandled exception
+                // Unhandled exception: LibGit2Sharp.CheckoutConflictException
+                // It is being catched, as otherwise this breaks.
+                // But since the exception is thrown, even the "var result" is never populated.
+                // So I will never get to show conflicts with this.
                 if (result.Status == MergeStatus.Conflicts)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Merge conflicts detected! Please resolve them manually.");
-                    Console.ResetColor();
-
-                    Console.WriteLine(repo.Index.Conflicts.Any());
+                    // Console.ResetColor();
                     // Optionally: List conflicted files-
                     foreach (var conflict in repo.Index.Conflicts)
                     {
-                        Console.WriteLine("Ttest");
                         string path = conflict.Ours?.Path ?? conflict.Theirs?.Path ?? conflict.Ancestor?.Path ?? "(unknown path)";
                         Console.WriteLine($"Conflict in file: {path}");
                     }
@@ -190,7 +193,6 @@ namespace SharpGit.Classes
         {
             try
             {
-                // Display the branch information
                 string branchName = repo.Head.FriendlyName;
                 Console.WriteLine($"On branch {branchName}");
 
@@ -198,18 +200,18 @@ namespace SharpGit.Classes
                 var statusOptions = new StatusOptions();
                 var statuses = repo.RetrieveStatus(statusOptions);
                 var details = repo.Head.TrackingDetails;
-                Console.WriteLine(details.BehindBy);
-                Console.WriteLine(details.AheadBy);
-                Console.WriteLine($"Testing {details.AheadBy}");
-                if (details.BehindBy < 0)
+                if (details.BehindBy > 0)
                 {
-                    Console.WriteLine($"Your branch is behind {branchName} by {details.BehindBy} commit, and can be fast-forwarded. (use sharpgit pull to update your local branch)");
+                    Console.WriteLine($"Your branch is behind {branchName} by {details.BehindBy} commit, and can be fast-forwarded. (use sharpgit pull to update your local commits)\n");
                 }
-                if (details.AheadBy < 0)
+                if (details.AheadBy > 0)
                 {
-                    Console.WriteLine($"Your branch is ahead {branchName} by {details.BehindBy} commit, and can be fast-forwarded.\n ŋµŋµ(use sharpgit pull to update your local branch)");
+                    Console.WriteLine($"Your branch is ahead {branchName} by {details.AheadBy} commits. \n (use sharpgit push to update your local commits)\n");
                 }
-                Console.WriteLine($"Your branch is behind {branchName} by {details.BehindBy} commit, and can be fast-forwarded. (use sharpgit pull to update your local branch)");
+                if (details.AheadBy == 0 && details.BehindBy == 0)
+                {
+                    Console.WriteLine("Your branch is up to date.\n");
+                }
                 var itemStatusesList = new List<string>();
 
                 foreach (var item in statuses)
@@ -231,7 +233,7 @@ namespace SharpGit.Classes
                     }
                 }
 
-                if (itemStatusesList.Any(s => s.Contains("NewInIndex") || s.Contains("ModifiedInIndex") || s.Contains("ModifiedInWorkdir") || s.Contains("RenamedInIndex") || s.Contains("DeletedFromIndex")))
+                if (itemStatusesList.Any(s => s.Contains("NewInIndex") || s.Contains("ModifiedInWorkdir") || s.Contains("RenamedInIndex") || s.Contains("DeletedFromIndex")))
                 {
                     // Changes not staged for commit
                     Console.WriteLine("\nChanges not staged for commit:");
@@ -241,7 +243,6 @@ namespace SharpGit.Classes
                     {
                         if ((item.State & FileStatus.ModifiedInWorkdir) != 0)
                         {
-
                             Console.WriteLine($"        modified:   {item.FilePath}");
                         }
                     }

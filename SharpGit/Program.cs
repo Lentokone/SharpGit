@@ -113,7 +113,8 @@ class Program
                 return;
             }
             Console.WriteLine($"{message}");
-            //GitService.CommitChanges(repo, message);
+            // GitService.CommitChanges(repo, message);
+            GitService.CommitToRepo(repo, message);
         }, messageOption);
 
         // clone
@@ -162,7 +163,6 @@ class Program
                 Console.WriteLine("No repository found in the current directory.");
                 return;
             }
-            Console.WriteLine("Elä samperi vielä kokeile");
             GitService.PullFromRepo(repo);
         });
 
@@ -185,8 +185,6 @@ class Program
         var logLengthArgument = new Argument<int>("length", () => 15, "Length of displayed commit log");
         logCommand.AddArgument(logLengthArgument);
         logCommand.SetHandler((int length) => {
-            Console.WriteLine("Log command called");
-
             var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
             if (repo == null)
             {
@@ -201,7 +199,6 @@ class Program
         SetRemoteCommand.SetHandler(() => {
             Console.WriteLine("Set Remote command called");
             Console.WriteLine("This is currently not supported");
-
         });
 
         // Add all to root
