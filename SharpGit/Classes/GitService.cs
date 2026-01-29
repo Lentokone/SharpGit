@@ -68,7 +68,13 @@ namespace SharpGit.Classes
                 //repo.Index.Write();
 
                 // Create the committer's signature and commit
-                Signature author = new Signature("James", "@jugglingnutcase", DateTime.Now);
+                var name = repo.Config.Get<string>("user.name")?.Value;
+                var email = repo.Config.Get<string>("user.email")?.Value;
+
+                // Have this grab the author name from the .sharpgit local directory instead of Git's global config.
+                // Will probably save some mental pain from doing it with that instead.
+                Console.WriteLine();
+                Signature author = new Signature(name, email, DateTime.Now);
                 Signature committer = author;
 
                 // Commit to the repository
@@ -86,8 +92,6 @@ namespace SharpGit.Classes
         {
             try
             {
-                // Tähän se että se tekee directory sille repository
-                // Jepjep. Nyt on aika testata throttleeko tämäkin paska.
                 var targetDir = givenPath ?? Directory.GetCurrentDirectory();
                 var directoryName = remotePath.TrimEnd('/').Split('/').Last();
 
@@ -303,6 +307,9 @@ namespace SharpGit.Classes
                     Console.WriteLine(c.Message);
                     Console.WriteLine();
                 }
+                Console.WriteLine(repo.Config.Get<string>("user.name")?.Value);
+                Console.WriteLine(repo.Config.Get<string>("user.email")?.Value);
+                Console.WriteLine(GitUtils.GetUsernameFromConfig());
             }
             catch
             (Exception ex)

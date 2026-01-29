@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace SharpGit.Classes
@@ -30,6 +31,49 @@ namespace SharpGit.Classes
                 dir = dir.Parent;
             }
             return null;
+        }
+
+        // Unfinished.
+        // Split the Directory.CreateDirectory into its own function.
+        // !  Make this function return the username from the config.
+        public static string GetUsernameFromConfig()
+        {
+            var path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            var sharpgitDir = Path.Combine(path, ".sharpgit");
+            var configPath = Path.Combine(sharpgitDir, "config.json");
+
+            Directory.CreateDirectory(sharpgitDir);
+            if (!File.Exists(configPath))
+            {
+                Console.WriteLine("pprekele");
+                var defaultConfig = new SharpGitConfig
+                {
+                    User = new UserConfig
+                    {
+                        Name = "unknown",
+                        Email = "unknown"
+                    },
+                    Server = new ServerConfig
+                    {
+                        BaseUrl = "not implemented yet"
+                    }
+                };
+
+                var json = JsonSerializer.Serialize(
+                    defaultConfig,
+                    new JsonSerializerOptions { WriteIndented = true }
+                );
+
+                File.WriteAllText(configPath, json);
+
+                Console.WriteLine("config.json creation.");
+            }
+            else
+            {
+                Console.WriteLine("4skin");
+
+            }
+            return path;
         }
     }
 }
