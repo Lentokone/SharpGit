@@ -1,11 +1,6 @@
 ﻿using LibGit2Sharp;
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SharpGit.Classes
 {
@@ -13,7 +8,6 @@ namespace SharpGit.Classes
     {
         public static void InitRepo()
         {
-            // Initialize a new repository
             string repoPath = Path.Combine(Directory.GetCurrentDirectory(), "MyRepo");
             Repository.Init(repoPath);
             Console.WriteLine($"Initialized empty Git repository in {repoPath}");
@@ -23,6 +17,10 @@ namespace SharpGit.Classes
         // Ja pilkkoo sen urlin. Esimerkillä tämän projektin repo "https://github.com/Lentokone/FSWADP_Console_side"
         // Muuttaa sen kunnolliseen remotePath muotoon.
         // "kayttis@server:/home/kayttis/shubrepos/Lentokone/FSWADP..."
+        //
+        // 25/02/2026
+        // Noin tehdään koska tämä Git välinen liikenne toimii ssh kautta
+        //
         public static void AddToRepo(Repository repo, string filePath)
         {
             try
@@ -77,7 +75,6 @@ namespace SharpGit.Classes
                 Signature author = new Signature(name, email, DateTime.Now);
                 Signature committer = author;
 
-                // Commit to the repository
                 Commit commit = repo.Commit(message, author, committer);
             }
             catch (Exception ex)
@@ -169,7 +166,7 @@ namespace SharpGit.Classes
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Merge conflicts detected! Please resolve them manually.");
-                    // Console.ResetColor();
+                    Console.ResetColor();
                     // Optionally: List conflicted files-
                     foreach (var conflict in repo.Index.Conflicts)
                     {
@@ -239,7 +236,6 @@ namespace SharpGit.Classes
 
                 if (itemStatusesList.Any(s => s.Contains("NewInIndex") || s.Contains("ModifiedInWorkdir") || s.Contains("RenamedInIndex") || s.Contains("DeletedFromIndex")))
                 {
-                    // Changes not staged for commit
                     Console.WriteLine("\nChanges not staged for commit:");
                     Console.WriteLine($"  (use \"git add <file>...\" to update what will be committed)");
                     Console.WriteLine($"  (use \"git restore <file>...\" to discard changes in working directory)");
@@ -256,7 +252,6 @@ namespace SharpGit.Classes
 
                 if (itemStatusesList.Any(s => s.Contains("NewInWorkdir")))
                 {
-                    // Untracked files
                     Console.WriteLine("Untracked files:");
                     Console.WriteLine($"  (use \"git add <file>...\" to include in what will be committed)");
                     foreach (var item in statuses)
@@ -297,7 +292,7 @@ namespace SharpGit.Classes
 
                     if (c.Parents.Count() > 1)
                     {
-                        Console.WriteLine("Merge: {0}", 
+                        Console.WriteLine("Merge: {0}",
                             string.Join(" ", c.Parents.Select(p => p.Id.Sha.Substring(0, 7)).ToArray()));
                     }
 
@@ -338,7 +333,7 @@ namespace SharpGit.Classes
             {
                 repo.Network.Remotes.Add("origin", remotePath);
                 Console.WriteLine("Testermaan");
-            }            
+            }
         }
     }
 }

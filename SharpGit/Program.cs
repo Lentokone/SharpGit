@@ -9,12 +9,13 @@ using SharpGit.Classes;
 ////! Ja ssh
 ////! Ja auth tarkistus mvc puolelle
 
-//// Kun on pushaamassa, lähettää ennen sitä jonkun viestin mvc puolelle, joka tekee sen git init --bare puolen
-
-//// Vaikka git remote add kohdassa voisi tehdä sen auth jutun ja tag se local repo jotenkin että se tietää että on auth kontsa
-
 //TODO Muista ottaa nuo writelinet pois
 
+//NOTE 25/02/2026
+//
+// Aika tehdä loppuun
+// Yritän tähdätä viikon eteenpäin deadlinen.
+// Eli 4/03/2026
 
 // Nonni
 // Vähän ajatuksia tänne, etten unohda.
@@ -26,7 +27,7 @@ using SharpGit.Classes;
 // Kun on action time, se tarkistaa tokenin ja sitten tekee magiaa
 
 // Eli tulen tarviimaan jonkinsorting .sharpgit, johon tallennetaan ssh keyt ja config.json
-// Joka on muotoa. ---
+// Joka on muotoa.
 
 /*
 {
@@ -52,11 +53,11 @@ class Program
     {
         var rootCommand = new RootCommand("SharpGit CLI - a minimal git-like tool");
 
-        
 
         // init
         var initCommand = new Command("init", "Initialize a new repository. Unsupported for now.");
-        initCommand.SetHandler(() => {
+        initCommand.SetHandler(() =>
+        {
             Console.WriteLine("Init command called");
             Console.WriteLine("This is still unsupported.");
             GitService.InitRepo();
@@ -81,7 +82,6 @@ class Program
             {
                 return;
             }
-            // GitService.AddToRepo(url, path);
             if (update)
             {
                 Console.WriteLine("Using '--update' or '-u' to stage modified and deleted files.");
@@ -103,7 +103,8 @@ class Program
         );
         messageOption.AddAlias("-m");
         commitCommand.AddOption(messageOption);
-        commitCommand.SetHandler((string message) => {
+        commitCommand.SetHandler((string message) =>
+        {
             Console.WriteLine($"Commit command called with message: {message}");
 
             var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
@@ -113,36 +114,30 @@ class Program
                 return;
             }
             Console.WriteLine($"{message}");
-            // GitService.CommitChanges(repo, message);
             GitService.CommitToRepo(repo, message);
         }, messageOption);
 
         // clone
-        // KESKEN
-        // KESKEN Paska vitun c# ja roslyn
         // KESKEN
         var cloneCommand = new Command("clone", "Clone a repository");
         var repoUrlArg = new Argument<string>("url", "Repository URL");
         var targetDirArg = new Argument<string?>("path", () => null, "Target directory (optional)");
         cloneCommand.AddArgument(repoUrlArg);
         cloneCommand.AddArgument(targetDirArg);
-        cloneCommand.SetHandler((string url, string? path) => {
+        cloneCommand.SetHandler((string url, string? path) =>
+        {
             Console.WriteLine($"Clone command called for: {url}");
             GitService.CloneRepo(url, path);
 
-            // var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
-            // if (repo == null)
-            // {
-            //     return;
-            // }
             Console.WriteLine("Can not clone to current directory. Current directory is not empty.");
         }, repoUrlArg, targetDirArg);
 
         // push
         var pushCommand = new Command("push", "Push changes to remote");
-        pushCommand.SetHandler(() => {
+        pushCommand.SetHandler(() =>
+        {
             Console.WriteLine("Push command called");
-            
+
             var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
             if (repo == null)
             {
@@ -154,7 +149,8 @@ class Program
 
         // pull
         var pullCommand = new Command("pull", "Pull changes from remote");
-        pullCommand.SetHandler(() => {
+        pullCommand.SetHandler(() =>
+        {
             Console.WriteLine("Pull command called");
 
             var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
@@ -168,7 +164,8 @@ class Program
 
         // status
         var statusCommand = new Command("status", "Show the working tree status");
-        statusCommand.SetHandler(() => {
+        statusCommand.SetHandler(() =>
+        {
             Console.WriteLine("Status command called");
 
             var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
@@ -177,14 +174,15 @@ class Program
                 Console.WriteLine("No repository found in the current directory.");
                 return;
             }
-            GitService.DisplayGitStatus(repo); // Display the status of the repository
+            GitService.DisplayGitStatus(repo);
         });
 
         // log
         var logCommand = new Command("log", "Show the commit tree");
         var logLengthArgument = new Argument<int>("length", () => 15, "Length of displayed commit log");
         logCommand.AddArgument(logLengthArgument);
-        logCommand.SetHandler((int length) => {
+        logCommand.SetHandler((int length) =>
+        {
             var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
             if (repo == null)
             {
@@ -193,10 +191,11 @@ class Program
             }
             GitService.DisplayLog(repo, length);
         }, logLengthArgument);
-        
+
         // remote
         var SetRemoteCommand = new Command("remote", "Set the remote destination of the repository. Currently not supported");
-        SetRemoteCommand.SetHandler(() => {
+        SetRemoteCommand.SetHandler(() =>
+        {
             Console.WriteLine("Set Remote command called");
             Console.WriteLine("This is currently not supported");
         });

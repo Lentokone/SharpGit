@@ -1,10 +1,5 @@
 ﻿using LibGit2Sharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace SharpGit.Classes
 {
@@ -45,7 +40,6 @@ namespace SharpGit.Classes
             Directory.CreateDirectory(sharpgitDir);
             if (!File.Exists(configPath))
             {
-                Console.WriteLine("pprekele");
                 var defaultConfig = new SharpGitConfig
                 {
                     User = new UserConfig
