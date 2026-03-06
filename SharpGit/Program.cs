@@ -60,7 +60,7 @@ class Program
         {
             Console.WriteLine("Init command called");
             Console.WriteLine("This is still unsupported.");
-            GitService.InitRepo();
+            // GitService.InitRepo();
         });
 
         // add
