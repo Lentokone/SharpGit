@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace SharpGit.Classes
 {
-    internal class GitUtils
+    public class GitUtils
     {
         // Tänne viellä ne gitignore template ja muut.
         // Funktio joka sitten tekee sen annetulla numerolla (esim. 1 = vstudio, 2 = node, 3 = python jne)

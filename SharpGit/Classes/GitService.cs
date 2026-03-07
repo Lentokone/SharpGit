@@ -4,7 +4,7 @@ using System.Globalization;
 
 namespace SharpGit.Classes
 {
-    internal class GitService
+    public class GitService
     {
         public static void InitRepo()
         {
