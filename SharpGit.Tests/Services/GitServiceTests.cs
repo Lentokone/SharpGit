@@ -58,4 +58,31 @@ public class GitServiceTests
 				Directory.Delete(TestingPath, true);
 		}
 	}
+
+	[Fact]
+	public void TestAddFileFromOutsideRepo()
+	{
+		var TestingPath = Path.Combine(Path.GetTempPath(), "SharpGitTests-" + Guid.NewGuid());
+		try
+		{
+			var RepoPath = Path.Combine(TestingPath, "test");
+			string RootedPath = Repository.Init(RepoPath);
+			Assert.True(Directory.Exists(Path.Combine(RootedPath, "objects")));
+
+			var repo = new Repository(RootedPath);
+			Assert.Empty(repo.RetrieveStatus());
+
+			string fileOutside = Path.Combine(TestingPath, "test.txt");
+			File.WriteAllText(fileOutside, "Test");
+
+			GitService.AddToRepo(repo, fileOutside);
+			Assert.Empty(repo.RetrieveStatus());
+
+		}
+		finally
+		{
+			if (Directory.Exists(TestingPath))
+				Directory.Delete(TestingPath, true);
+		}
+	}
 }
