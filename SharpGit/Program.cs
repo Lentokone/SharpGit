@@ -91,7 +91,13 @@ class Program
             foreach (var path in paths)
             {
                 Console.WriteLine($"Adding file or directory: {path}");
-                GitService.AddToRepo(repo, path);
+                var result = GitService.AddToRepo(repo, path);
+                if (!result.Success)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"Add failed: {result.Message}");
+                    Console.ResetColor();
+                }
             }
         }, updateOption, addPathArg);
 

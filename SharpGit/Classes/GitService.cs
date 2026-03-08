@@ -21,18 +21,18 @@ namespace SharpGit.Classes
         // 25/02/2026
         // Noin tehdään koska tämä Git välinen liikenne toimii ssh kautta
         //
-        public static void AddToRepo(Repository repo, string filePath)
+
+        public static (bool Success, string? Message) AddToRepo(Repository repo, string filePath)
         {
             try
             {
                 repo.Index.Add(filePath);
                 repo.Index.Write();
+                return (true, null);
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Add failed: {ex.Message}");
-                Console.ResetColor();
+                return (false, e.Message);
             }
         }
 
