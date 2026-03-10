@@ -103,14 +103,14 @@ class Program
         }, updateOption, addPathArg);
 
         // remove
-        // var removeCommand = new Command("remove", "Remove tracked object");
-        // var addPathArg = new Argument<IEnumerable<string>>("path", "Path to file or directory");
-        //
-        // removeCommand.AddArgument(addPathArg);
-        // removeCommand.SetHandler((string path) =>
-        //         {
-        //
-        //         }, addPathArg);
+        var removeCommand = new Command("remove", "Remove tracked object");
+        var removePathArg = new Argument<IEnumerable<string>>("path", "Path to file or directory");
+
+        removeCommand.AddArgument(addPathArg);
+        removeCommand.SetHandler((IEnumerable<string> path) =>
+        {
+
+        }, removePathArg);
 
 
         // commit
@@ -221,6 +221,7 @@ class Program
         // Add all to root
         rootCommand.AddCommand(initCommand);
         rootCommand.AddCommand(addCommand);
+        rootCommand.AddCommand(removeCommand);
         rootCommand.AddCommand(commitCommand);
         rootCommand.AddCommand(cloneCommand);
         rootCommand.AddCommand(pushCommand);
