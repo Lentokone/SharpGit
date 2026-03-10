@@ -97,9 +97,21 @@ class Program
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"Add failed: {result.Message}");
                     Console.ResetColor();
+                    Environment.Exit(1);
                 }
             }
         }, updateOption, addPathArg);
+
+        // remove
+        // var removeCommand = new Command("remove", "Remove tracked object");
+        // var addPathArg = new Argument<IEnumerable<string>>("path", "Path to file or directory");
+        //
+        // removeCommand.AddArgument(addPathArg);
+        // removeCommand.SetHandler((string path) =>
+        //         {
+        //
+        //         }, addPathArg);
+
 
         // commit
         var commitCommand = new Command("commit", "Record changes to the repository");

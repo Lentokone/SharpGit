@@ -302,9 +302,6 @@ namespace SharpGit.Classes
                     Console.WriteLine(c.Message);
                     Console.WriteLine();
                 }
-                Console.WriteLine(repo.Config.Get<string>("user.name")?.Value);
-                Console.WriteLine(repo.Config.Get<string>("user.email")?.Value);
-                Console.WriteLine(GitUtils.GetUsernameFromConfig());
             }
             catch
             (Exception ex)
