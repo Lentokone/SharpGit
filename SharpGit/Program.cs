@@ -80,12 +80,19 @@ class Program
             var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
             if (repo == null)
             {
+                Environment.Exit(1);
                 return;
             }
             if (update)
             {
                 Console.WriteLine("Using '--update' or '-u' to stage modified and deleted files.");
-                GitService.AddToRepoUpdate(repo);
+                var result = GitService.AddToRepoUpdate(repo);
+                if (!result.Success)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"Add failed: {result.Message}");
+                    Console.ResetColor();
+                }
             }
 
             foreach (var path in paths)
@@ -116,7 +123,6 @@ class Program
                 return;
             }
 
-
         }, removePathArg);
 
 
@@ -135,6 +141,7 @@ class Program
             var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
             if (repo == null)
             {
+                Environment.Exit(1);
                 Console.WriteLine("No repository found in the current directory.");
                 return;
             }
@@ -166,6 +173,7 @@ class Program
             var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
             if (repo == null)
             {
+                Environment.Exit(1);
                 Console.WriteLine("No repository found in the current directory.");
                 return;
             }
@@ -181,6 +189,7 @@ class Program
             var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
             if (repo == null)
             {
+                Environment.Exit(1);
                 Console.WriteLine("No repository found in the current directory.");
                 return;
             }
@@ -196,6 +205,7 @@ class Program
             var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
             if (repo == null)
             {
+                Environment.Exit(1);
                 Console.WriteLine("No repository found in the current directory.");
                 return;
             }
@@ -211,6 +221,7 @@ class Program
             var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
             if (repo == null)
             {
+                Environment.Exit(1);
                 Console.WriteLine("No repository found in the current directory.");
                 return;
             }

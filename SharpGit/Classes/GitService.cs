@@ -36,37 +36,69 @@ namespace SharpGit.Classes
                 };
                 return result;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
                 var result = new GitResult
                 {
                     Success = false,
                     Message = $"Failed to add '{filePath}' to repository",
-                    Exception = e,
+                    Exception = ex,
                 };
                 return result;
             }
         }
 
-        public static void AddToRepoUpdate(Repository repo)
+        public static GitResult AddToRepoUpdate(Repository repo)
         {
             try
             {
                 Commands.Stage(repo, "*");
+                var result = new GitResult
+                {
+                    Success = true,
+                    Message = null,
+                    Exception = null,
+                };
+                return result;
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Add failed: {ex.Message}");
-                Console.ResetColor();
+                var result = new GitResult
+                {
+                    Success = false,
+                    Message = "Failed to add with *",
+                    Exception = ex,
+                };
+                return result;
             }
         }
 
-        public static void RemoveFromRepo(Repository repo, string filePath)
+        public static GitResult RemoveFromRepo(Repository repo, string filePath)
         {
-            repo.Index.Remove(filePath);
+            try
+            {
+                repo.Index.Remove(filePath);
+                var result = new GitResult
+                {
+                    Success = true,
+                    Message = null,
+                    Exception = null,
+                };
+                return result;
+            }
+            catch (Exception ex)
+            {
+                var result = new GitResult
+                {
+                    Success = false,
+                    Message = $"Failed to remove '{filePath}' from repository",
+                    Exception = ex,
+                };
+                return result;
+            }
         }
 
+        //TODO: Refactor this
         // TODO TÄMÄ ON VIELÄ KESKEN
         // Puuttuu oikea signature ja muut
         // Ne pitää hakea jonkin sortin config.json tiedostosta
@@ -94,6 +126,7 @@ namespace SharpGit.Classes
             }
         }
 
+        //TODO: Refactor this
         public static void CloneRepo(string remotePath, string? givenPath)
         {
             try
@@ -119,6 +152,7 @@ namespace SharpGit.Classes
             }
         }
 
+        //TODO: Refactor this
         public static void PushToRepo(Repository repo)
         {
             try
@@ -141,6 +175,7 @@ namespace SharpGit.Classes
             }
         }
 
+        //TODO: Refactor this
         // Ei ole testattu
         // 19/01/ 22:25, testattu, toimii
         public static void PullFromRepo(Repository repo)
