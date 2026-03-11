@@ -95,7 +95,7 @@ class Program
                 if (!result.Success)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"Add failed: {result.Message}");
+                    Console.WriteLine($"{result.Message}");
                     Console.ResetColor();
                     Environment.Exit(1);
                 }
@@ -109,6 +109,13 @@ class Program
         removeCommand.AddArgument(addPathArg);
         removeCommand.SetHandler((IEnumerable<string> path) =>
         {
+            var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
+            if (repo == null)
+            {
+                Environment.Exit(1);
+                return;
+            }
+
 
         }, removePathArg);
 

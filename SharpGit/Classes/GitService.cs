@@ -22,17 +22,29 @@ namespace SharpGit.Classes
         // Noin tehdään koska tämä Git välinen liikenne toimii ssh kautta
         //
 
-        public static (bool Success, string? Message) AddToRepo(Repository repo, string filePath)
+        public static GitResult AddToRepo(Repository repo, string filePath)
         {
             try
             {
                 repo.Index.Add(filePath);
                 repo.Index.Write();
-                return (true, null);
+                var result = new GitResult
+                {
+                    Success = true,
+                    Message = null,
+                    Exception = null,
+                };
+                return result;
             }
             catch (Exception e)
             {
-                return (false, e.Message);
+                var result = new GitResult
+                {
+                    Success = false,
+                    Message = $"Failed to add '{filePath}' to repository",
+                    Exception = e,
+                };
+                return result;
             }
         }
 
@@ -50,6 +62,11 @@ namespace SharpGit.Classes
             }
         }
 
+        public static void RemoveFromRepo(Repository repo, string filePath)
+        {
+            repo.Index.Remove(filePath);
+        }
+
         // TODO TÄMÄ ON VIELÄ KESKEN
         // Puuttuu oikea signature ja muut
         // Ne pitää hakea jonkin sortin config.json tiedostosta
@@ -57,14 +74,6 @@ namespace SharpGit.Classes
         {
             try
             {
-                // Write content to file system
-                //var content = "Commit this!";
-                //File.WriteAllText(Path.Combine(repo.Info.WorkingDirectory, "fileToCommit.txt"), content);
-
-                // Stage the file
-                //repo.Index.Add("fileToCommit.txt");
-                //repo.Index.Write();
-
                 // Create the committer's signature and commit
                 var name = repo.Config.Get<string>("user.name")?.Value;
                 var email = repo.Config.Get<string>("user.email")?.Value;
