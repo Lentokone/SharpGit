@@ -92,6 +92,7 @@ class Program
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"Add failed: {result.Message}");
                     Console.ResetColor();
+                    Environment.Exit(1);
                 }
             }
 
@@ -146,7 +147,14 @@ class Program
                 return;
             }
             Console.WriteLine($"{message}");
-            GitService.CommitToRepo(repo, message);
+            var result = GitService.CommitToRepo(repo, message);
+            if (!result.Success)
+            {
+                Environment.Exit(1);
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(result.Message);
+                Console.ResetColor();
+            }
         }, messageOption);
 
         // clone
@@ -159,9 +167,14 @@ class Program
         cloneCommand.SetHandler((string url, string? path) =>
         {
             Console.WriteLine($"Clone command called for: {url}");
-            GitService.CloneRepo(url, path);
-
-            Console.WriteLine("Can not clone to current directory. Current directory is not empty.");
+            var result = GitService.CloneRepo(url, path);
+            if (!result.Success)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(result.Message);
+                Console.ResetColor();
+                Environment.Exit(1);
+            }
         }, repoUrlArg, targetDirArg);
 
         // push
@@ -177,7 +190,15 @@ class Program
                 Console.WriteLine("No repository found in the current directory.");
                 return;
             }
-            GitService.PushToRepo(repo);
+            var result = GitService.PushToRepo(repo);
+            Console.WriteLine("Pushing successful");
+            if (!result.Success)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(result.Message);
+                Console.ResetColor();
+                Environment.Exit(1);
+            }
         });
 
         // pull

@@ -21,6 +21,8 @@ namespace SharpGit.Classes
         // 25/02/2026
         // Noin tehdään koska tämä Git välinen liikenne toimii ssh kautta
         //
+        //Moro. 12/03/2026 Olli tässä
+        //Ei mitään tietoa mitä tuo ylempi tarkoitti
 
         public static GitResult AddToRepo(Repository repo, string filePath)
         {
@@ -28,23 +30,11 @@ namespace SharpGit.Classes
             {
                 repo.Index.Add(filePath);
                 repo.Index.Write();
-                var result = new GitResult
-                {
-                    Success = true,
-                    Message = null,
-                    Exception = null,
-                };
-                return result;
+                return GitResult.Ok();
             }
             catch (Exception ex)
             {
-                var result = new GitResult
-                {
-                    Success = false,
-                    Message = $"Failed to add '{filePath}' to repository",
-                    Exception = ex,
-                };
-                return result;
+                return GitResult.Fail("Failed to add '{filePath}' to repository", ex);
             }
         }
 
@@ -53,23 +43,11 @@ namespace SharpGit.Classes
             try
             {
                 Commands.Stage(repo, "*");
-                var result = new GitResult
-                {
-                    Success = true,
-                    Message = null,
-                    Exception = null,
-                };
-                return result;
+                return GitResult.Ok();
             }
             catch (Exception ex)
             {
-                var result = new GitResult
-                {
-                    Success = false,
-                    Message = "Failed to add with *",
-                    Exception = ex,
-                };
-                return result;
+                return GitResult.Fail("Failed to add with *Failed to add with *", ex);
             }
         }
 
@@ -78,31 +56,18 @@ namespace SharpGit.Classes
             try
             {
                 repo.Index.Remove(filePath);
-                var result = new GitResult
-                {
-                    Success = true,
-                    Message = null,
-                    Exception = null,
-                };
-                return result;
+                return GitResult.Ok();
             }
             catch (Exception ex)
             {
-                var result = new GitResult
-                {
-                    Success = false,
-                    Message = $"Failed to remove '{filePath}' from repository",
-                    Exception = ex,
-                };
-                return result;
+                return GitResult.Fail("Failed to remove '{filePath}' from repository", ex);
             }
         }
 
-        //TODO: Refactor this
         // TODO TÄMÄ ON VIELÄ KESKEN
         // Puuttuu oikea signature ja muut
         // Ne pitää hakea jonkin sortin config.json tiedostosta
-        public static void CommitToRepo(Repository repo, string message)
+        public static GitResult CommitToRepo(Repository repo, string message)
         {
             try
             {
@@ -117,17 +82,15 @@ namespace SharpGit.Classes
                 Signature committer = author;
 
                 Commit commit = repo.Commit(message, author, committer);
+                return GitResult.Ok();
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Commit failed: {ex.Message}");
-                Console.ResetColor();
+                return GitResult.Fail("Commit failed", ex);
             }
         }
 
-        //TODO: Refactor this
-        public static void CloneRepo(string remotePath, string? givenPath)
+        public static GitResult CloneRepo(string remotePath, string? givenPath)
         {
             try
             {
@@ -139,39 +102,30 @@ namespace SharpGit.Classes
                     directoryName = directoryName[..^4];
                 }
 
-                Console.WriteLine(directoryName);
                 var fullDirectory = Path.Combine(targetDir, directoryName);
                 Directory.CreateDirectory(fullDirectory);
                 Repository.Clone(remotePath, fullDirectory);
+                return GitResult.Ok();
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Clone failed: {ex.Message}");
-                Console.ResetColor();
+                return GitResult.Fail($"Cloning failed with path :{remotePath}", ex);
             }
         }
 
-        //TODO: Refactor this
-        public static void PushToRepo(Repository repo)
+        public static GitResult PushToRepo(Repository repo)
         {
             try
             {
                 var pushOptions = new PushOptions();
 
-                if (repo == null)
-                {
-                    Console.WriteLine("No repository found in the current directory.");
-                    return;
-                }
                 var branch = repo.Branches["main"] ?? repo.Branches["master"];
                 repo.Network.Push(branch, pushOptions);
+                return GitResult.Ok();
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Push failed: {ex.Message}");
-                Console.ResetColor();
+                return GitResult.Fail("Pushing failed", ex);
             }
         }
 
