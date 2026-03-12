@@ -89,10 +89,10 @@ class Program
                 var result = GitService.AddToRepoUpdate(repo);
                 if (!result.Success)
                 {
+                    Environment.Exit(1);
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"Add failed: {result.Message}");
                     Console.ResetColor();
-                    Environment.Exit(1);
                 }
             }
 
@@ -102,10 +102,10 @@ class Program
                 var result = GitService.AddToRepo(repo, path);
                 if (!result.Success)
                 {
+                    Environment.Exit(1);
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"{result.Message}");
                     Console.ResetColor();
-                    Environment.Exit(1);
                 }
             }
         }, updateOption, addPathArg);
@@ -171,9 +171,9 @@ class Program
             if (!result.Success)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
+                Environment.Exit(1);
                 Console.WriteLine(result.Message);
                 Console.ResetColor();
-                Environment.Exit(1);
             }
         }, repoUrlArg, targetDirArg);
 
@@ -194,10 +194,10 @@ class Program
             Console.WriteLine("Pushing successful");
             if (!result.Success)
             {
+                Environment.Exit(1);
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(result.Message);
                 Console.ResetColor();
-                Environment.Exit(1);
             }
         });
 
@@ -214,7 +214,15 @@ class Program
                 Console.WriteLine("No repository found in the current directory.");
                 return;
             }
-            GitService.PullFromRepo(repo);
+            var result = GitService.PullFromRepo(repo);
+
+            if (!result.Success)
+            {
+                Environment.Exit(1);
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(result.Message);
+                Console.ResetColor();
+            }
         });
 
         // status
@@ -230,7 +238,14 @@ class Program
                 Console.WriteLine("No repository found in the current directory.");
                 return;
             }
-            GitService.DisplayGitStatus(repo);
+            var result = GitService.DisplayGitStatus(repo);
+            if (!result.Success)
+            {
+                Environment.Exit(1);
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(result.Message);
+                Console.ResetColor();
+            }
         });
 
         // log
@@ -246,7 +261,14 @@ class Program
                 Console.WriteLine("No repository found in the current directory.");
                 return;
             }
-            GitService.DisplayLog(repo, length);
+            var result = GitService.DisplayLog(repo, length);
+            if (!result.Success)
+            {
+                Environment.Exit(1);
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(result.Message);
+                Console.ResetColor();
+            }
         }, logLengthArgument);
 
         // remote

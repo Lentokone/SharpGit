@@ -47,7 +47,7 @@ namespace SharpGit.Classes
             }
             catch (Exception ex)
             {
-                return GitResult.Fail("Failed to add with *Failed to add with *", ex);
+                return GitResult.Fail("Failed to add with *", ex);
             }
         }
 
@@ -64,7 +64,7 @@ namespace SharpGit.Classes
             }
         }
 
-        // TODO TÄMÄ ON VIELÄ KESKEN
+        // TODO: TÄMÄ ON VIELÄ KESKEN
         // Puuttuu oikea signature ja muut
         // Ne pitää hakea jonkin sortin config.json tiedostosta
         public static GitResult CommitToRepo(Repository repo, string message)
@@ -132,7 +132,7 @@ namespace SharpGit.Classes
         //TODO: Refactor this
         // Ei ole testattu
         // 19/01/ 22:25, testattu, toimii
-        public static void PullFromRepo(Repository repo)
+        public static GitResult PullFromRepo(Repository repo)
         {
             try
             {
@@ -143,12 +143,6 @@ namespace SharpGit.Classes
                         // Muista lisätä tänne ssh avain hommat ja muut
                     }
                 };
-                if (repo == null)
-                {
-                    Console.WriteLine("No repository found in the current directory.");
-                    return;
-                }
-
                 var signature = new LibGit2Sharp.Signature(
                     new Identity("MERGE_USER_NAME", "MERGE_USER_EMAIL"), DateTimeOffset.Now);
 
@@ -160,6 +154,8 @@ namespace SharpGit.Classes
                 // It is being catched, as otherwise this breaks.
                 // But since the exception is thrown, even the "var result" is never populated.
                 // So I will never get to show conflicts with this.
+                //
+                // This does trigger in some cases.
                 if (result.Status == MergeStatus.Conflicts)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
@@ -178,17 +174,16 @@ namespace SharpGit.Classes
                     Console.WriteLine("Pull successful! No merge conflicts.");
                     Console.ResetColor();
                 }
+                return GitResult.Ok();
             }
             catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"Pull failed: {ex.Message}");
-                Console.ResetColor();
+                return GitResult.Fail("Pull failed.", ex);
             }
         }
 
         // TODO VÄRIT PUUTTUU
-        public static void DisplayGitStatus(Repository repo)
+        public static GitResult DisplayGitStatus(Repository repo)
         {
             try
             {
@@ -271,14 +266,15 @@ namespace SharpGit.Classes
                 {
                     Console.WriteLine("nothing to commit, working tree clean");
                 }
+                return GitResult.Ok();
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error retrieving status: " + ex.Message);
+                return GitResult.Fail("Error retrieving status", ex);
             }
         }
 
-        public static void DisplayLog(Repository repo, int length)
+        public static GitResult DisplayLog(Repository repo, int length)
         {
             try
             {
@@ -300,11 +296,12 @@ namespace SharpGit.Classes
                     Console.WriteLine(c.Message);
                     Console.WriteLine();
                 }
+                return GitResult.Ok();
             }
             catch
             (Exception ex)
             {
-                Console.WriteLine("Error retrieving log: " + ex.Message);
+                return GitResult.Fail("Error retrieving log", ex);
             }
         }
         //! This is for testing only.
