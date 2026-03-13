@@ -70,14 +70,22 @@ class Program
             description: "Update the local repository"
         );
         updateOption.AddAlias("-u");
+
+        var allOption = new Option<bool>(
+                name: "--all",
+                description: "Add every file to be tracked"
+                );
+        allOption.AddAlias("-a");
         var addPathArg = new Argument<IEnumerable<string>>("path", "Path to file or directory");
 
         addCommand.AddOption(updateOption);
+        addCommand.AddOption(allOption);
         addCommand.AddArgument(addPathArg);
 
-        addCommand.SetHandler((bool update, IEnumerable<string> paths) =>
+        addCommand.SetHandler((bool update, bool all, IEnumerable<string> paths) =>
         {
             var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
+            var result = new GitResult();
             if (repo == null)
             {
                 Environment.Exit(1);
@@ -85,30 +93,27 @@ class Program
             }
             if (update)
             {
-                Console.WriteLine("Using '--update' or '-u' to stage modified and deleted files.");
-                var result = GitService.AddToRepoUpdate(repo);
-                if (!result.Success)
-                {
-                    Environment.Exit(1);
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"Add failed: {result.Message}");
-                    Console.ResetColor();
-                }
+                Console.WriteLine("Using '--update' or '-u' to stage changes and deletions");
+                result = GitService.AddToRepoUpdate(repo);
             }
-
+            if (all)
+            {
+                Console.WriteLine("Using '--all' to add every file to be tracked");
+                result = GitService.AddToRepoAll(repo);
+            }
             foreach (var path in paths)
             {
                 Console.WriteLine($"Adding file or directory: {path}");
-                var result = GitService.AddToRepo(repo, path);
-                if (!result.Success)
-                {
-                    Environment.Exit(1);
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"{result.Message}");
-                    Console.ResetColor();
-                }
+                result = GitService.AddToRepo(repo, path);
             }
-        }, updateOption, addPathArg);
+            if (!result.Success)
+            {
+                Environment.Exit(1);
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"{result.Message}");
+                Console.ResetColor();
+            }
+        }, updateOption, allOption, addPathArg);
 
         // remove
         var removeCommand = new Command("remove", "Remove tracked object");

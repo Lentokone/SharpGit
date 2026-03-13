@@ -42,6 +42,28 @@ namespace SharpGit.Classes
         {
             try
             {
+                var statuses = repo.RetrieveStatus();
+                var filtered = statuses
+                    .Where(i =>
+                        (i.State & (FileStatus.ModifiedInWorkdir | FileStatus.DeletedFromWorkdir | FileStatus.TypeChangeInWorkdir | FileStatus.RenamedInWorkdir)) != 0);
+
+                foreach (var item in filtered)
+                {
+                    repo.Index.Add(item.FilePath);
+                    repo.Index.Write();
+                }
+                return GitResult.Ok();
+            }
+            catch (Exception ex)
+            {
+                return GitResult.Fail("Failed to update tracked files", ex);
+            }
+        }
+
+        public static GitResult AddToRepoAll(Repository repo)
+        {
+            try
+            {
                 Commands.Stage(repo, "*");
                 return GitResult.Ok();
             }
