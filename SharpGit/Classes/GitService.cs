@@ -99,13 +99,12 @@ namespace SharpGit.Classes
         {
             try
             {
-                // Create the committer's signature and commit
                 var name = repo.Config.Get<string>("user.name")?.Value;
                 var email = repo.Config.Get<string>("user.email")?.Value;
 
                 // Have this grab the author name from the .sharpgit local directory instead of Git's global config.
                 // Will probably save some mental pain from doing it with that instead.
-                Console.WriteLine();
+                Console.WriteLine(name + email);
                 Signature author = new Signature(name, email, DateTime.Now);
                 Signature committer = author;
 
@@ -118,7 +117,7 @@ namespace SharpGit.Classes
             }
         }
 
-        public static GitResult CloneRepo(string remotePath, string? givenPath)
+        public static GitResult CloneRepo(string remotePath, string? givenPath = null)
         {
             try
             {

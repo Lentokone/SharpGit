@@ -493,4 +493,44 @@ public class GitServiceTests
 				Directory.Delete(TestingPath, true);
 		}
 	}
+
+
+	// Tähän väliin nuo commit jutut.
+
+	[Fact]
+	public static void CloneRepo_WorksWithNoGivenPath()
+	{
+		var TestingPath = Path.Combine(Path.GetTempPath(), "SharpGitTests-" + Guid.NewGuid());
+		try
+		{
+			var RepoPath = Path.Combine(TestingPath, "remote/test");
+			string RootedPath = Repository.Init(RepoPath);
+			Assert.True(Directory.Exists(Path.Combine(RootedPath, "objects")));
+
+			var repo = new Repository(RootedPath);
+			Assert.Empty(repo.RetrieveStatus());
+
+			string file1path = Path.Combine(RepoPath, "test1.txt");
+			File.WriteAllText(file1path, "Test 1");
+			Assert.Equal(FileStatus.NewInWorkdir, repo.RetrieveStatus().First().State);
+
+			repo.Index.Add("test1.txt");
+			repo.Index.Write();
+			Signature author = new Signature("James", "@jugglingnutcase", DateTime.Now);
+			Signature committer = author;
+			Directory.SetCurrentDirectory(TestingPath);
+			GitService.CloneRepo(RepoPath);
+
+			Assert.True(Directory.Exists(TestingPath + "/test"));
+			var ClonedRepo = new Repository(Path.Combine(TestingPath, "test"));
+			Assert.Empty(ClonedRepo.RetrieveStatus());
+			Assert.NotNull(ClonedRepo.Head.Tip);
+
+		}
+		finally
+		{
+			if (Directory.Exists(TestingPath))
+				Directory.Delete(TestingPath, true);
+		}
+	}
 }
