@@ -123,6 +123,8 @@ namespace SharpGit.Classes
             {
                 var targetDir = givenPath ?? Directory.GetCurrentDirectory();
                 var directoryName = remotePath.TrimEnd('/').Split('/').Last();
+                if (!Directory.Exists(targetDir))
+                    Directory.CreateDirectory(targetDir);
 
                 if (directoryName.EndsWith(".git"))
                 {

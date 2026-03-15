@@ -518,6 +518,7 @@ public class GitServiceTests
 			repo.Index.Write();
 			Signature author = new Signature("James", "@jugglingnutcase", DateTime.Now);
 			Signature committer = author;
+			Commit commit = repo.Commit("A test commit for the cloning.", author, committer);
 			Directory.SetCurrentDirectory(TestingPath);
 			GitService.CloneRepo(RepoPath);
 
@@ -525,7 +526,80 @@ public class GitServiceTests
 			var ClonedRepo = new Repository(Path.Combine(TestingPath, "test"));
 			Assert.Empty(ClonedRepo.RetrieveStatus());
 			Assert.NotNull(ClonedRepo.Head.Tip);
+		}
+		finally
+		{
+			if (Directory.Exists(TestingPath))
+				Directory.Delete(TestingPath, true);
+		}
+	}
 
+	[Fact]
+	public static void CloneRepo_WorksWithRelativePath()
+	{
+		var TestingPath = Path.Combine(Path.GetTempPath(), "SharpGitTests-" + Guid.NewGuid());
+		try
+		{
+			var RepoPath = Path.Combine(TestingPath, "remote/test");
+			string RootedPath = Repository.Init(RepoPath);
+			Assert.True(Directory.Exists(Path.Combine(RootedPath, "objects")));
+
+			var repo = new Repository(RootedPath);
+			Assert.Empty(repo.RetrieveStatus());
+
+			string file1path = Path.Combine(RepoPath, "test1.txt");
+			File.WriteAllText(file1path, "Test 1");
+			Assert.Equal(FileStatus.NewInWorkdir, repo.RetrieveStatus().First().State);
+
+			repo.Index.Add("test1.txt");
+			repo.Index.Write();
+			Signature author = new Signature("James", "@jugglingnutcase", DateTime.Now);
+			Signature committer = author;
+			Commit commit = repo.Commit("A test commit for the cloning.", author, committer);
+			Directory.SetCurrentDirectory(TestingPath);
+			GitService.CloneRepo(RepoPath, "important");
+
+			Assert.True(Directory.Exists(TestingPath + "/important/test"));
+			var ClonedRepo = new Repository(Path.Combine(TestingPath, "important/test"));
+			Assert.Empty(ClonedRepo.RetrieveStatus());
+			Assert.NotNull(ClonedRepo.Head.Tip);
+		}
+		finally
+		{
+			if (Directory.Exists(TestingPath))
+				Directory.Delete(TestingPath, true);
+		}
+	}
+	[Fact]
+	public static void CloneRepo_WorksWithAbsolutePath()
+	{
+		var TestingPath = Path.Combine(Path.GetTempPath(), "SharpGitTests-" + Guid.NewGuid());
+		try
+		{
+			var RepoPath = Path.Combine(TestingPath, "remote/test");
+			string RootedPath = Repository.Init(RepoPath);
+			Assert.True(Directory.Exists(Path.Combine(RootedPath, "objects")));
+
+			var repo = new Repository(RootedPath);
+			Assert.Empty(repo.RetrieveStatus());
+
+			string file1path = Path.Combine(RepoPath, "test1.txt");
+			File.WriteAllText(file1path, "Test 1");
+			Assert.Equal(FileStatus.NewInWorkdir, repo.RetrieveStatus().First().State);
+
+			repo.Index.Add("test1.txt");
+			repo.Index.Write();
+			Signature author = new Signature("James", "@jugglingnutcase", DateTime.Now);
+			Signature committer = author;
+			Commit commit = repo.Commit("A test commit for the cloning.", author, committer);
+
+			var AbsolutePath = Path.Combine(TestingPath, "AbsoluteDir");
+			GitService.CloneRepo(RepoPath, AbsolutePath);
+			Assert.True(Directory.Exists(AbsolutePath + "/test"));
+
+			var ClonedRepo = new Repository(Path.Combine(AbsolutePath, "test"));
+			Assert.Empty(ClonedRepo.RetrieveStatus());
+			Assert.NotNull(ClonedRepo.Head.Tip);
 		}
 		finally
 		{
