@@ -77,7 +77,13 @@ namespace SharpGit.Classes
         {
             try
             {
+                var status = repo.RetrieveStatus(filePath);
+                if (status == FileStatus.NewInWorkdir)
+                    return GitResult.Fail("File is not tracked");
                 repo.Index.Remove(filePath);
+                var realFilePath = Path.Combine(repo.Info.WorkingDirectory, filePath);
+                if (File.Exists(realFilePath))
+                    File.Delete(realFilePath);
                 return GitResult.Ok();
             }
             catch (Exception ex)

@@ -395,7 +395,97 @@ public class GitServiceTests
 
 			GitService.RemoveFromRepo(repo, "test1.txt");
 
+			Assert.Empty(repo.RetrieveStatus());
+		}
+		finally
+		{
+			if (Directory.Exists(TestingPath))
+				Directory.Delete(TestingPath, true);
+		}
+	}
+
+	[Fact]
+	public static void RemoveFromRepo_DoesntRemoveNonExistent()
+	{
+		var TestingPath = Path.Combine(Path.GetTempPath(), "SharpGitTests-" + Guid.NewGuid());
+		try
+		{
+			var RepoPath = Path.Combine(TestingPath, "test");
+			string RootedPath = Repository.Init(RepoPath);
+			Assert.True(Directory.Exists(Path.Combine(RootedPath, "objects")));
+
+			var repo = new Repository(RootedPath);
+			Assert.Empty(repo.RetrieveStatus());
+
+			GitService.RemoveFromRepo(repo, "nonExistent.txt");
+			var status = repo.RetrieveStatus();
+			Assert.Empty(status);
+		}
+		finally
+		{
+			if (Directory.Exists(TestingPath))
+				Directory.Delete(TestingPath, true);
+		}
+	}
+
+	[Fact]
+	public static void RemoveFromRepo_DoesntRemoveFileFromOutsideRepo()
+	{
+		var TestingPath = Path.Combine(Path.GetTempPath(), "SharpGitTests-" + Guid.NewGuid());
+		try
+		{
+			var RepoPath = Path.Combine(TestingPath, "test");
+			string RootedPath = Repository.Init(RepoPath);
+			Assert.True(Directory.Exists(Path.Combine(RootedPath, "objects")));
+
+			var repo = new Repository(RootedPath);
+			Assert.Empty(repo.RetrieveStatus());
+
+			string fileOutside = Path.Combine(TestingPath, "test.txt");
+			File.WriteAllText(fileOutside, "Test");
+
+			GitService.RemoveFromRepo(repo, fileOutside);
+			var status = repo.RetrieveStatus();
+			Assert.Empty(status);
+		}
+		finally
+		{
+			if (Directory.Exists(TestingPath))
+				Directory.Delete(TestingPath, true);
+		}
+	}
+
+	[Fact]
+	public static void RemoveFromRepo_RemoveCommittedFile()
+	{
+		var TestingPath = Path.Combine(Path.GetTempPath(), "SharpGitTests-" + Guid.NewGuid());
+		try
+		{
+			var RepoPath = Path.Combine(TestingPath, "test");
+			string RootedPath = Repository.Init(RepoPath);
+			Assert.True(Directory.Exists(Path.Combine(RootedPath, "objects")));
+
+			var repo = new Repository(RootedPath);
+			Assert.Empty(repo.RetrieveStatus());
+
+			string file1path = Path.Combine(RepoPath, "test1.txt");
+			File.WriteAllText(file1path, "Test 1");
 			Assert.Equal(FileStatus.NewInWorkdir, repo.RetrieveStatus().First().State);
+
+			repo.Index.Add("test1.txt");
+			repo.Index.Write();
+			Signature author = new Signature("James", "@jugglingnutcase", DateTime.Now);
+			Signature committer = author;
+			// Just to mention. Those weird author and Commit message additions are straight from the LibGit2Sharp's Github wiki.
+			Commit commit = repo.Commit("Here's a commit i made!", author, committer);
+			var status = repo.RetrieveStatus();
+			Assert.Empty(status);
+
+			GitService.RemoveFromRepo(repo, "test1.txt");
+			status = repo.RetrieveStatus();
+
+			Assert.True(status.First().State.HasFlag(FileStatus.DeletedFromIndex));
+			Assert.False(File.Exists(file1path));
 		}
 		finally
 		{
