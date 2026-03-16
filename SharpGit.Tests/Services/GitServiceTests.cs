@@ -572,6 +572,12 @@ public class GitServiceTests
 				Directory.Delete(TestingPath, true);
 		}
 	}
+	// <summary>
+	//
+	// This tests if the CloneRepo() function works with an absolute path
+	// and also to see if it will make a directory that doesn't exist
+	// 
+	// </summary>
 	[Fact]
 	public static void CloneRepo_WorksWithAbsolutePath()
 	{
@@ -596,10 +602,11 @@ public class GitServiceTests
 			Commit commit = repo.Commit("A test commit for the cloning.", author, committer);
 
 			var AbsolutePath = Path.Combine(TestingPath, "AbsoluteDir");
-			GitService.CloneRepo(RepoPath, AbsolutePath);
-			Assert.True(Directory.Exists(AbsolutePath + "/test"));
+			// This is for the cloning function to also try to make a new directory called "/repos"
+			GitService.CloneRepo(RepoPath, AbsolutePath + "/repos");
+			Assert.True(Directory.Exists(AbsolutePath + "/repos/test"));
 
-			var ClonedRepo = new Repository(Path.Combine(AbsolutePath, "test"));
+			var ClonedRepo = new Repository(Path.Combine(AbsolutePath, "repos/test"));
 			Assert.Empty(ClonedRepo.RetrieveStatus());
 			Assert.NotNull(ClonedRepo.Head.Tip);
 		}
