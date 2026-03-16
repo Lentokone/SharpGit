@@ -519,11 +519,13 @@ public class GitServiceTests
 			Signature author = new Signature("James", "@jugglingnutcase", DateTime.Now);
 			Signature committer = author;
 			Commit commit = repo.Commit("A test commit for the cloning.", author, committer);
-			Directory.SetCurrentDirectory(TestingPath);
+			var localPath = Path.Combine(TestingPath, "local");
+			Directory.CreateDirectory(localPath);
+			Directory.SetCurrentDirectory(localPath);
 			GitService.CloneRepo(RepoPath);
 
-			Assert.True(Directory.Exists(TestingPath + "/test"));
-			var ClonedRepo = new Repository(Path.Combine(TestingPath, "test"));
+			Assert.True(Directory.Exists(localPath + "/test"));
+			var ClonedRepo = new Repository(Path.Combine(localPath, "test"));
 			Assert.Empty(ClonedRepo.RetrieveStatus());
 			Assert.NotNull(ClonedRepo.Head.Tip);
 		}

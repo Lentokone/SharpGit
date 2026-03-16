@@ -125,7 +125,10 @@ namespace SharpGit.Classes
                 var directoryName = remotePath.TrimEnd('/').Split('/').Last();
                 if (!Directory.Exists(targetDir))
                     Directory.CreateDirectory(targetDir);
-
+                if (Directory.EnumerateFileSystemEntries(targetDir).Any())
+                {
+                    return GitResult.Fail("Given directory was not empty.");
+                }
                 if (directoryName.EndsWith(".git"))
                 {
                     directoryName = directoryName[..^4];
