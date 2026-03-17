@@ -616,4 +616,206 @@ public class GitServiceTests
 				Directory.Delete(TestingPath, true);
 		}
 	}
+
+	[Fact]
+	public static void PushToRepo_Works()
+	{
+		var TestingPath = Path.Combine(Path.GetTempPath(), "SharpGitTests-" + Guid.NewGuid());
+		try
+		{
+			var LocalRepoPath = Path.Combine(TestingPath, "remote/testlocal");
+			string RootedPathForLocal = Repository.Init(LocalRepoPath);
+			Assert.True(Directory.Exists(Path.Combine(RootedPathForLocal, "objects")));
+			var BareRepoPath = Path.Combine(TestingPath, "remote/testbare.git");
+			string RootedPathForBare = Repository.Init(BareRepoPath, true);
+			Assert.True(Directory.Exists(Path.Combine(RootedPathForBare, "objects")));
+
+			var LocalRepo = new Repository(RootedPathForLocal);
+			Assert.Empty(LocalRepo.RetrieveStatus());
+			var BareRepo = new Repository(RootedPathForBare);
+			Assert.True(BareRepo.Info.IsBare);
+
+			string file1path = Path.Combine(LocalRepoPath, "test1.txt");
+			File.WriteAllText(file1path, "Test 1");
+			Assert.Equal(FileStatus.NewInWorkdir, LocalRepo.RetrieveStatus().First().State);
+
+			LocalRepo.Index.Add("test1.txt");
+			LocalRepo.Index.Write();
+			Signature author = new Signature("James", "@jugglingnutcase", DateTime.Now);
+			Signature committer = author;
+			Commit commit = LocalRepo.Commit("A test commit for the cloning.", author, committer);
+
+			if (LocalRepo.Network.Remotes["origin"] == null)
+			{
+				LocalRepo.Network.Remotes.Add("origin", RootedPathForBare);
+			}
+			LocalRepo.Branches.Update(LocalRepo.Head, b =>
+			{
+				b.Remote = "origin";
+				b.UpstreamBranch = "refs/heads/master";
+			});
+
+			Assert.Empty(BareRepo.Commits);
+			GitService.PushToRepo(LocalRepo);
+			Assert.Equal(LocalRepo.Head.Tip.Sha, BareRepo.Head.Tip.Sha);
+		}
+		finally
+		{
+			if (Directory.Exists(TestingPath))
+				Directory.Delete(TestingPath, true);
+		}
+	}
+
+	[Fact]
+	public static void PushToRepo_WithNoCommits()
+	{
+		var TestingPath = Path.Combine(Path.GetTempPath(), "SharpGitTests-" + Guid.NewGuid());
+		try
+		{
+			var LocalRepoPath = Path.Combine(TestingPath, "remote/testlocal");
+			string RootedPathForLocal = Repository.Init(LocalRepoPath);
+			Assert.True(Directory.Exists(Path.Combine(RootedPathForLocal, "objects")));
+			var BareRepoPath = Path.Combine(TestingPath, "remote/testbare.git");
+			string RootedPathForBare = Repository.Init(BareRepoPath, true);
+			Assert.True(Directory.Exists(Path.Combine(RootedPathForBare, "objects")));
+
+			var LocalRepo = new Repository(RootedPathForLocal);
+			Assert.Empty(LocalRepo.RetrieveStatus());
+			var BareRepo = new Repository(RootedPathForBare);
+			Assert.True(BareRepo.Info.IsBare);
+
+			if (LocalRepo.Network.Remotes["origin"] == null)
+			{
+				LocalRepo.Network.Remotes.Add("origin", RootedPathForBare);
+			}
+			LocalRepo.Branches.Update(LocalRepo.Head, b =>
+			{
+				b.Remote = "origin";
+				b.UpstreamBranch = "refs/heads/master";
+			});
+
+			Assert.False(BareRepo.Commits.Any());
+			GitService.PushToRepo(LocalRepo);
+			Assert.False(BareRepo.Commits.Any());
+		}
+		finally
+		{
+			if (Directory.Exists(TestingPath))
+				Directory.Delete(TestingPath, true);
+		}
+	}
+
+	[Fact]
+	public static void PushToRepo_WithNoUpstream()
+	{
+		var TestingPath = Path.Combine(Path.GetTempPath(), "SharpGitTests-" + Guid.NewGuid());
+		try
+		{
+			var LocalRepoPath = Path.Combine(TestingPath, "remote/testlocal");
+			string RootedPathForLocal = Repository.Init(LocalRepoPath);
+			Assert.True(Directory.Exists(Path.Combine(RootedPathForLocal, "objects")));
+			var BareRepoPath = Path.Combine(TestingPath, "remote/testbare.git");
+			string RootedPathForBare = Repository.Init(BareRepoPath, true);
+			Assert.True(Directory.Exists(Path.Combine(RootedPathForBare, "objects")));
+
+			var LocalRepo = new Repository(RootedPathForLocal);
+			Assert.Empty(LocalRepo.RetrieveStatus());
+			var BareRepo = new Repository(RootedPathForBare);
+			Assert.True(BareRepo.Info.IsBare);
+
+			string file1path = Path.Combine(LocalRepoPath, "test1.txt");
+			File.WriteAllText(file1path, "Test 1");
+			Assert.Equal(FileStatus.NewInWorkdir, LocalRepo.RetrieveStatus().First().State);
+
+			LocalRepo.Index.Add("test1.txt");
+			LocalRepo.Index.Write();
+			Signature author = new Signature("James", "@jugglingnutcase", DateTime.Now);
+			Signature committer = author;
+			Commit commit = LocalRepo.Commit("A test commit for the cloning.", author, committer);
+
+			Assert.False(BareRepo.Commits.Any());
+			GitService.PushToRepo(LocalRepo);
+			Assert.False(BareRepo.Commits.Any());
+		}
+		finally
+		{
+			if (Directory.Exists(TestingPath))
+				Directory.Delete(TestingPath, true);
+		}
+	}
+
+	// <summary
+	// This test verifies that pushing works for both an empty and a non-empty remote repository.
+	//
+	// The first push initializes the remote repository and sets its HEAD.
+	// The second push verifies that pushing again correctly updates the remote HEAD
+	// when the repository already contains commits.
+	// </summary>
+	[Fact]
+	public static void PushToRepo_WorksToNonEmptyBare()
+	{
+		var TestingPath = Path.Combine(Path.GetTempPath(), "SharpGitTests-" + Guid.NewGuid());
+		try
+		{
+			var LocalRepoPath = Path.Combine(TestingPath, "remote/testlocal");
+			string RootedPathForLocal = Repository.Init(LocalRepoPath);
+			Assert.True(Directory.Exists(Path.Combine(RootedPathForLocal, "objects")));
+			var BareRepoPath = Path.Combine(TestingPath, "remote/testbare.git");
+			string RootedPathForBare = Repository.Init(BareRepoPath, true);
+			Assert.True(Directory.Exists(Path.Combine(RootedPathForBare, "objects")));
+
+			var LocalRepo = new Repository(RootedPathForLocal);
+			Assert.Empty(LocalRepo.RetrieveStatus());
+			var BareRepo = new Repository(RootedPathForBare);
+			Assert.True(BareRepo.Info.IsBare);
+
+			if (LocalRepo.Network.Remotes["origin"] == null)
+			{
+				LocalRepo.Network.Remotes.Add("origin", RootedPathForBare);
+			}
+			LocalRepo.Branches.Update(LocalRepo.Head, b =>
+			{
+				b.Remote = "origin";
+				b.UpstreamBranch = "refs/heads/master";
+			});
+
+			string file1path = Path.Combine(LocalRepoPath, "test1.txt");
+			File.WriteAllText(file1path, "Test 1");
+			Assert.Equal(FileStatus.NewInWorkdir, LocalRepo.RetrieveStatus().First().State);
+
+			LocalRepo.Index.Add("test1.txt");
+			LocalRepo.Index.Write();
+			Signature author = new Signature("James", "@jugglingnutcase", DateTime.Now);
+			Signature committer = author;
+			Commit commit = LocalRepo.Commit("A test commit for the cloning.", author, committer);
+
+			Assert.Empty(BareRepo.Commits);
+			GitService.PushToRepo(LocalRepo);
+
+			File.WriteAllText(file1path, "Beast of burden");
+			Assert.Equal(FileStatus.ModifiedInWorkdir, LocalRepo.RetrieveStatus().First().State);
+
+			LocalRepo.Index.Add("test1.txt");
+			LocalRepo.Index.Write();
+			author = new Signature("James", "@jugglingnutcase", DateTime.Now);
+			committer = author;
+			commit = LocalRepo.Commit("A test commit for the cloning.", author, committer);
+
+			GitService.PushToRepo(LocalRepo);
+
+			Assert.Equal(LocalRepo.Head.Tip.Sha, BareRepo.Head.Tip.Sha);
+		}
+		finally
+		{
+			if (Directory.Exists(TestingPath))
+				Directory.Delete(TestingPath, true);
+		}
+	}
+
+	// Tests for pulling
+	[Fact(Skip = "Unfinished")]
+	public static void PullFromRepo_Works()
+	{
+
+	}
 }
