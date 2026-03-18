@@ -812,7 +812,6 @@ public class GitServiceTests
 		}
 	}
 
-	// Tests for pulling
 	[Fact]
 	public static void PullFromRepo_Works()
 	{
@@ -852,6 +851,101 @@ public class GitServiceTests
 
 			GitService.PullFromRepo(pullingRepo);
 			Assert.Equal(pullingRepo.Head.Tip.Sha, BareRepo.Head.Tip.Sha);
+		}
+		finally
+		{
+			if (Directory.Exists(TestingPath))
+				Directory.Delete(TestingPath, true);
+		}
+	}
+
+	[Fact]
+	public static void PullFromRepo_WorksTwice()
+	{
+		var TestingPath = Path.Combine(Path.GetTempPath(), "SharpGitTests-" + Guid.NewGuid());
+		try
+		{
+			var BareRepoPath = Path.Combine(TestingPath, "remote/testbare.git");
+			string RootedPathForBare = Repository.Init(BareRepoPath, true);
+			Assert.True(Directory.Exists(Path.Combine(RootedPathForBare, "objects")));
+
+			var PushingRepoPath = Path.Combine(TestingPath, "remote/testpushing");
+			var PullingRepoPath = Path.Combine(TestingPath, "remote/testpulling");
+
+			Repository.Clone(BareRepoPath, PushingRepoPath);
+			Repository.Clone(BareRepoPath, PullingRepoPath);
+			var pushingRepo = new Repository(PushingRepoPath);
+			var pullingRepo = new Repository(PullingRepoPath);
+			Assert.Empty(pullingRepo.RetrieveStatus());
+			Assert.Empty(pushingRepo.RetrieveStatus());
+
+			string file1path = Path.Combine(PushingRepoPath, "test1.txt");
+			File.WriteAllText(file1path, "Test 1");
+			Assert.Equal(FileStatus.NewInWorkdir, pushingRepo.RetrieveStatus().First().State);
+
+			pushingRepo.Index.Add("test1.txt");
+			pushingRepo.Index.Write();
+			Signature author = new Signature("James", "@jugglingnutcase", DateTime.Now);
+			Signature committer = author;
+			Commit commit = pushingRepo.Commit("A test commit for the cloning.", author, committer);
+
+			var BareRepo = new Repository(BareRepoPath);
+			Assert.Empty(BareRepo.Commits);
+			GitService.PushToRepo(pushingRepo);
+			pushingRepo.Network.Push(pushingRepo.Branches["master"]);
+
+			Assert.Equal(pushingRepo.Head.Tip.Sha, BareRepo.Head.Tip.Sha);
+
+			GitService.PullFromRepo(pullingRepo);
+			Assert.Equal(pullingRepo.Head.Tip.Sha, BareRepo.Head.Tip.Sha);
+
+			File.WriteAllText(file1path, "Test number two");
+			Assert.Equal(FileStatus.ModifiedInWorkdir, pushingRepo.RetrieveStatus().First().State);
+
+			pushingRepo.Index.Add("test1.txt");
+			pushingRepo.Index.Write();
+			author = new Signature("James", "@jugglingnutcase", DateTime.Now);
+			committer = author;
+			commit = pushingRepo.Commit("A test commit for the cloning.", author, committer);
+
+			BareRepo = new Repository(BareRepoPath);
+			GitService.PushToRepo(pushingRepo);
+			pushingRepo.Network.Push(pushingRepo.Branches["master"]);
+
+			Assert.Equal(pushingRepo.Head.Tip.Sha, BareRepo.Head.Tip.Sha);
+
+			GitService.PullFromRepo(pullingRepo);
+			Assert.Equal(pullingRepo.Head.Tip.Sha, BareRepo.Head.Tip.Sha);
+
+		}
+		finally
+		{
+			if (Directory.Exists(TestingPath))
+				Directory.Delete(TestingPath, true);
+		}
+	}
+
+	[Fact]
+	public static void PullFromRepo_NoFunnyBusinessIfNoNewCommits()
+	{
+		var TestingPath = Path.Combine(Path.GetTempPath(), "SharpGitTests-" + Guid.NewGuid());
+		try
+		{
+			var BareRepoPath = Path.Combine(TestingPath, "remote/testbare.git");
+			string RootedPathForBare = Repository.Init(BareRepoPath, true);
+			Assert.True(Directory.Exists(Path.Combine(RootedPathForBare, "objects")));
+
+			var PullingRepoPath = Path.Combine(TestingPath, "remote/testpulling");
+
+			Repository.Clone(BareRepoPath, PullingRepoPath);
+			var pullingRepo = new Repository(PullingRepoPath);
+			Assert.Empty(pullingRepo.RetrieveStatus());
+
+			var BareRepo = new Repository(BareRepoPath);
+			Assert.Empty(BareRepo.Commits);
+			GitService.PullFromRepo(pullingRepo);
+			Assert.Null(pullingRepo.Head.Tip);
+			Assert.Null(BareRepo.Head.Tip);
 		}
 		finally
 		{
