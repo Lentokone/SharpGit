@@ -496,6 +496,37 @@ public class GitServiceTests
 
 
 	// Tähän väliin nuo commit jutut.
+	[Fact]
+	public static void CommitToRepo_Works()
+	{
+		var TestingPath = Path.Combine(Path.GetTempPath(), "SharpGitTests-" + Guid.NewGuid());
+		try
+		{
+			var RepoPath = Path.Combine(TestingPath, "test");
+			string RootedPath = Repository.Init(RepoPath);
+			Assert.True(Directory.Exists(Path.Combine(RootedPath, "objects")));
+
+			var repo = new Repository(RootedPath);
+
+			string file1path = Path.Combine(RepoPath, "test1.txt");
+			File.WriteAllText(file1path, "Test 1");
+			Assert.Equal(FileStatus.NewInWorkdir, repo.RetrieveStatus().First().State);
+
+			repo.Index.Add("test1.txt");
+			repo.Index.Write();
+			Signature author = new Signature("James", "@jugglingnutcase", DateTime.Now);
+			Signature committer = author;
+			// Just to mention. Those weird author and Commit message additions are straight from the LibGit2Sharp's Github wiki.
+			Commit commit = repo.Commit("Here's a commit i made!", author, committer);
+			var status = repo.RetrieveStatus();
+			Assert.Empty(status);
+		}
+		finally
+		{
+			if (Directory.Exists(TestingPath))
+				Directory.Delete(TestingPath, true);
+		}
+	}
 
 	[Fact]
 	public static void CloneRepo_WorksWithNoGivenPath()
@@ -916,7 +947,6 @@ public class GitServiceTests
 
 			GitService.PullFromRepo(pullingRepo);
 			Assert.Equal(pullingRepo.Head.Tip.Sha, BareRepo.Head.Tip.Sha);
-
 		}
 		finally
 		{
