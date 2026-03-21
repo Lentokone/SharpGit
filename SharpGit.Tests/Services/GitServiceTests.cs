@@ -512,10 +512,8 @@ public class GitServiceTests
 
 			repo.Index.Add("test1.txt");
 			repo.Index.Write();
-			Signature author = new Signature("James", "@jugglingnutcase", DateTime.Now);
-			Signature committer = author;
-			// Just to mention. Those weird author and Commit message additions are straight from the LibGit2Sharp's Github wiki.
-			Commit commit = repo.Commit("Here's a commit i made!", author, committer);
+
+			GitService.CommitToRepo(repo, "Testing");
 			var status = repo.RetrieveStatus();
 			Assert.Empty(status);
 		}
@@ -544,25 +542,43 @@ public class GitServiceTests
 
 			repo.Index.Add("test1.txt");
 			repo.Index.Write();
-			Signature author = new Signature("James", "@jugglingnutcase", DateTime.Now);
-			Signature committer = author;
-			// Just to mention. Those weird author and Commit message additions are straight from the LibGit2Sharp's Github wiki.
-			Commit commit = repo.Commit("Here's a commit i made!", author, committer);
-			var status = repo.RetrieveStatus();
-			Assert.Empty(status);
+			Assert.Null(repo.Head.Tip?.Sha);
+			GitService.CommitToRepo(repo, "Testing the commit function");
+			Assert.NotNull(repo.Head.Tip?.Sha);
 
 			File.WriteAllText(file1path, "Second test");
 			Assert.Equal(FileStatus.ModifiedInWorkdir, repo.RetrieveStatus().First().State);
 
 			repo.Index.Add("test1.txt");
 			repo.Index.Write();
-			author = new Signature("James", "@jugglingnutcase", DateTime.Now);
-			committer = author;
-			// Just to mention. Those weird author and Commit message additions are straight from the LibGit2Sharp's Github wiki.
-			commit = repo.Commit("Here's a commit i made!", author, committer);
-			status = repo.RetrieveStatus();
-			Assert.Empty(status);
+			var oldhead = repo.Head.Tip.Sha;
+			GitService.CommitToRepo(repo, "Second test for it");
+			Assert.NotEqual(oldhead, repo.Head.Tip.Sha);
+		}
+		finally
+		{
+			if (Directory.Exists(TestingPath))
+				Directory.Delete(TestingPath, true);
+		}
+	}
 
+	[Fact]
+	public static void CommitToRepo_DoesNothing()
+	{
+		var TestingPath = Path.Combine(Path.GetTempPath(), "SharpGitTests-" + Guid.NewGuid());
+		try
+		{
+			var RepoPath = Path.Combine(TestingPath, "test");
+			string RootedPath = Repository.Init(RepoPath);
+			Assert.True(Directory.Exists(Path.Combine(RootedPath, "objects")));
+
+			var repo = new Repository(RootedPath);
+
+			var oldhead = repo.Head.Tip?.Sha;
+			GitService.CommitToRepo(repo, "testing");
+			var status = repo.RetrieveStatus();
+			Assert.Empty(status);
+			Assert.NotEqual(oldhead, repo.Head.Tip?.Sha);
 		}
 		finally
 		{

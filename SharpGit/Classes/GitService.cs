@@ -104,7 +104,6 @@ namespace SharpGit.Classes
 
                 // Have this grab the author name from the .sharpgit local directory instead of Git's global config.
                 // Will probably save some mental pain from doing it with that instead.
-                Console.WriteLine(name + email);
                 Signature author = new Signature(name, email, DateTime.Now);
                 Signature committer = author;
 
