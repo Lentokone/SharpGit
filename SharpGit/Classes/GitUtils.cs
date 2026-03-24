@@ -31,16 +31,22 @@ namespace SharpGit.Classes
         // Unfinished.
         // Split the Directory.CreateDirectory into its own function.
         // !  Make this function return the username from the config.
-        public static string GetUsernameFromConfig()
+        //
+        // 24.03.2026
+        // UNFINISHED
+        //NOTE: UNFINISHED
+        public static SharpGitConfig GetUsernameFromConfig()
         {
             var path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             var sharpgitDir = Path.Combine(path, ".sharpgit");
             var configPath = Path.Combine(sharpgitDir, "config.json");
 
-            Directory.CreateDirectory(sharpgitDir);
+            if (!Directory.Exists(sharpgitDir))
+                Directory.CreateDirectory(sharpgitDir);
+
             if (!File.Exists(configPath))
             {
-                var defaultConfig = new SharpGitConfig
+                var config = new SharpGitConfig
                 {
                     User = new UserConfig
                     {
@@ -50,24 +56,22 @@ namespace SharpGit.Classes
                     Server = new ServerConfig
                     {
                         BaseUrl = "not implemented yet"
-                    }
+                    },
+                    Empty = true,
                 };
-
                 var json = JsonSerializer.Serialize(
-                    defaultConfig,
+                    config,
                     new JsonSerializerOptions { WriteIndented = true }
                 );
-
                 File.WriteAllText(configPath, json);
-
-                Console.WriteLine("config.json creation.");
+                return config;
             }
             else
             {
-                Console.WriteLine("4skin");
-
+                var json = File.ReadAllText(configPath);
+                var config = JsonSerializer.Deserialize<SharpGitConfig>(json) ?? new SharpGitConfig();
+                return config;
             }
-            return path;
         }
     }
 }
