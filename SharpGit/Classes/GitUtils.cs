@@ -28,6 +28,34 @@ namespace SharpGit.Classes
             return null;
         }
 
+        private static SharpGitConfig CreateDefaultConfig()
+        {
+            var path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            var sharpgitDir = Path.Combine(path, ".sharpgit");
+            var configPath = Path.Combine(sharpgitDir, "config.json");
+            if (!Directory.Exists(sharpgitDir))
+                Directory.CreateDirectory(sharpgitDir);
+
+            var config = new SharpGitConfig
+            {
+                User = new UserConfig
+                {
+                    Name = "unknown",
+                    Email = "unknown"
+                },
+                Server = new ServerConfig
+                {
+                    BaseUrl = "not implemented yet"
+                },
+                Empty = true,
+            };
+            var json = JsonSerializer.Serialize(
+                config,
+                new JsonSerializerOptions { WriteIndented = true }
+            );
+            File.WriteAllText(configPath, json);
+            return config;
+        }
         // Unfinished.
         // Split the Directory.CreateDirectory into its own function.
         // !  Make this function return the username from the config.
@@ -35,42 +63,20 @@ namespace SharpGit.Classes
         // 24.03.2026
         // UNFINISHED
         //NOTE: UNFINISHED
-        public static SharpGitConfig GetUsernameFromConfig()
+        public static SharpGitConfig GetConfig()
         {
             var path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             var sharpgitDir = Path.Combine(path, ".sharpgit");
             var configPath = Path.Combine(sharpgitDir, "config.json");
 
-            if (!Directory.Exists(sharpgitDir))
-                Directory.CreateDirectory(sharpgitDir);
-
             if (!File.Exists(configPath))
             {
-                var config = new SharpGitConfig
-                {
-                    User = new UserConfig
-                    {
-                        Name = "unknown",
-                        Email = "unknown"
-                    },
-                    Server = new ServerConfig
-                    {
-                        BaseUrl = "not implemented yet"
-                    },
-                    Empty = true,
-                };
-                var json = JsonSerializer.Serialize(
-                    config,
-                    new JsonSerializerOptions { WriteIndented = true }
-                );
-                File.WriteAllText(configPath, json);
-                return config;
+                return CreateDefaultConfig();
             }
             else
             {
                 var json = File.ReadAllText(configPath);
-                var config = JsonSerializer.Deserialize<SharpGitConfig>(json) ?? new SharpGitConfig();
-                return config;
+                return JsonSerializer.Deserialize<SharpGitConfig>(json) ?? new SharpGitConfig();
             }
         }
     }
