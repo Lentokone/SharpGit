@@ -28,10 +28,9 @@ public class GitUtilsTests
 		}
 	}
 
-	[Fact(Skip = "Unfinished and maybe false and a bad testing area")]
-	public void GetUsernameFromConfig_Works()
+	[Fact]
+	public void GetConfig_Works()
 	{
-
 		var TestingPath = Path.Combine(Path.GetTempPath(), "SharpGitTests-" + Guid.NewGuid());
 		try
 		{
@@ -40,8 +39,8 @@ public class GitUtilsTests
 
 			Assert.True(Directory.Exists(Path.Combine(rootedPath, "objects")));
 
-			var result = GitUtils.GetUsernameFromConfig();
-			Assert.True(result.Empty);
+			var result = GitUtils.GetConfig();
+			Assert.NotNull(result);
 		}
 		finally
 		{

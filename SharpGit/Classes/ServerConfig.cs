@@ -1,4 +1,5 @@
+//TODO: Remove if redundant
 public class ServerConfig
 {
-    public string BaseUrl { get; set;} = "placeholder for now";
+    public string BaseUrl { get; set; } = "placeholder for now";
 }

@@ -40,8 +40,8 @@ namespace SharpGit.Classes
             {
                 User = new UserConfig
                 {
-                    Name = "unknown",
-                    Email = "unknown"
+                    Name = "",
+                    Email = ""
                 },
                 Server = new ServerConfig
                 {
@@ -56,12 +56,7 @@ namespace SharpGit.Classes
             File.WriteAllText(configPath, json);
             return config;
         }
-        // Unfinished.
-        // Split the Directory.CreateDirectory into its own function.
-        // !  Make this function return the username from the config.
-        //
-        // 24.03.2026
-        // UNFINISHED
+
         //NOTE: UNFINISHED
         public static SharpGitConfig GetConfig()
         {
