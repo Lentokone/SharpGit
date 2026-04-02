@@ -57,7 +57,6 @@ namespace SharpGit.Classes
             return config;
         }
 
-        //NOTE: UNFINISHED
         public static SharpGitConfig GetConfig()
         {
             var path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);

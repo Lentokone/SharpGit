@@ -24,6 +24,8 @@ namespace SharpGit.Classes
         //Moro. 12/03/2026 Olli tässä
         //Ei mitään tietoa mitä tuo ylempi tarkoitti
 
+        // Terve. 1/04/2026 Olli tässä
+        // Ei vieläkään mitään ymmärrystä tosta
         public static GitResult AddToRepo(Repository repo, string filePath)
         {
             try
@@ -99,11 +101,10 @@ namespace SharpGit.Classes
         {
             try
             {
-                var name = repo.Config.Get<string>("user.name")?.Value;
-                var email = repo.Config.Get<string>("user.email")?.Value;
+                var config = GitUtils.GetConfig();
+                var name = config.User.Name;
+                var email = config.User.Email;
 
-                // Have this grab the author name from the .sharpgit local directory instead of Git's global config.
-                // Will probably save some mental pain from doing it with that instead.
                 Signature author = new Signature(name, email, DateTime.Now);
                 Signature committer = author;
 
