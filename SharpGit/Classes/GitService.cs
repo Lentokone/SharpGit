@@ -26,6 +26,30 @@ namespace SharpGit.Classes
 
         // Terve. 1/04/2026 Olli tässä
         // Ei vieläkään mitään ymmärrystä tosta
+
+        //TODO: Jep
+        //
+        //TODO ee
+        // Push through
+        public static void Login()
+        {
+            // Ask credentials
+            Console.WriteLine("LOGIN");
+            Console.WriteLine("Give your username");
+            var username = Console.ReadLine();
+
+            Console.WriteLine("Give your password");
+            var password = Console.ReadLine();
+            // Generate SSH key for server
+            // Send credentials and public ssh key, with HTTP to server's endpoint for validation
+            // Get JWT token and username and email in return
+            // Store username and email in .sharpgit/config.json
+            // Store JWT token there too, with token expiration time 
+
+            //Lastly, wrap every single function to be checking for the JWT token, if not, then prompting login credentials
+            //Login could just be for cloning, push/pull, and so.
+        }
+
         public static GitResult AddToRepo(Repository repo, string filePath)
         {
             try
@@ -94,9 +118,6 @@ namespace SharpGit.Classes
             }
         }
 
-        // TODO: TÄMÄ ON VIELÄ KESKEN
-        // Puuttuu oikea signature ja muut
-        // Ne pitää hakea jonkin sortin config.json tiedostosta
         public static GitResult CommitToRepo(Repository repo, string message)
         {
             try
@@ -222,7 +243,6 @@ namespace SharpGit.Classes
                 string branchName = repo.Head.FriendlyName;
                 Console.WriteLine($"On branch {branchName}");
 
-                // Separate modified and untracked files
                 var statusOptions = new StatusOptions();
                 var statuses = repo.RetrieveStatus(statusOptions);
                 var details = repo.Head.TrackingDetails;
@@ -334,29 +354,6 @@ namespace SharpGit.Classes
             (Exception ex)
             {
                 return GitResult.Fail("Error retrieving log", ex);
-            }
-        }
-        //! This is for testing only.
-        public static void SetRemoteRepo()
-        {
-            // Local repo path (not bare)
-            var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
-
-            //welho@192.168.1.114:/home/welho/sUPERTEST/SharGitRepo
-            //Tuossa on oman palvelimen osoite, joka sitten kulkee ssh yhteydellä.
-            // Remote repo path (the bare repo)
-            string remotePath = "file:///C:/FULLSTACK_WEBDEV_FSWDAP/heha.git";
-
-            if (repo == null)
-            {
-                Console.WriteLine("No repository found in the current directory.");
-                return;
-            }
-            // Add remote if it doesn't exist yet
-            if (repo.Network.Remotes["origin"] == null)
-            {
-                repo.Network.Remotes.Add("origin", remotePath);
-                Console.WriteLine("Testermaan");
             }
         }
     }
