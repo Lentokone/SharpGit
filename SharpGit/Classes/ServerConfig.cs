@@ -1,5 +1,16 @@
-//TODO: Remove if redundant
-public class ServerConfig
+public record ServerConfig
 {
-    public string BaseUrl { get; set; } = "placeholder for now";
+    public SSHkey sshkey = new();
+    public JWTToken token = new();
+}
+
+public record SSHkey
+{
+    // Emt
+}
+
+public record JWTToken
+{
+    // Token
+    // Duration
 }

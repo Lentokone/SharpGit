@@ -40,14 +40,12 @@ namespace SharpGit.Classes
             {
                 User = new UserConfig
                 {
-                    Name = "",
-                    Email = ""
+                    Name = "Unset",
+                    Email = "Unset"
                 },
                 Server = new ServerConfig
                 {
-                    BaseUrl = "not implemented yet"
                 },
-                Empty = true,
             };
             var json = JsonSerializer.Serialize(
                 config,

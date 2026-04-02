@@ -1,5 +1,5 @@
-public class UserConfig
+public record UserConfig
 {
-    public string Name { get; set;} = "unknown";
-    public string Email { get; set;} = "unknown";
+    public string Name { get; set; } = "unknown";
+    public string Email { get; set; } = "unknown";
 }
