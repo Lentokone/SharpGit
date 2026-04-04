@@ -26,7 +26,10 @@ namespace SharpGit.Classes
 
         // Terve. 1/04/2026 Olli tässä
         // Ei vieläkään mitään ymmärrystä tosta
-
+        //
+        // 04/04/2026 Olli tässä
+        // Deadline voisi olla 8/4/
+        // Onnea matkaan
         //TODO: Jep
         //
         //TODO ee
