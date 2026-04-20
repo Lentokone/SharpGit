@@ -1,6 +1,7 @@
 ﻿using LibGit2Sharp;
 using System.Data;
 using System.Globalization;
+using System.Diagnostics;
 
 namespace SharpGit.Classes
 {
@@ -27,12 +28,6 @@ namespace SharpGit.Classes
         // Terve. 1/04/2026 Olli tässä
         // Ei vieläkään mitään ymmärrystä tosta
         //
-        // 04/04/2026 Olli tässä
-        // Deadline voisi olla 8/4/
-        // Onnea matkaan
-        //TODO: Jep
-        //
-        //TODO ee
         // Push through
         public static void Login()
         {
@@ -44,6 +39,13 @@ namespace SharpGit.Classes
             Console.WriteLine("Give your password");
             var password = Console.ReadLine();
             // Generate SSH key for server
+            var psi = new ProcessStartInfo
+            {
+                FileName = "/usr/bin/alacritty",
+                Arguments = "-e ls",
+                UseShellExecute = false,
+            };
+            Process.Start(psi);
             // Send credentials and public ssh key, with HTTP to server's endpoint for validation
             // Get JWT token and username and email in return
             // Store username and email in .sharpgit/config.json
