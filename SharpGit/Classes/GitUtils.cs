@@ -1,13 +1,11 @@
 ﻿using LibGit2Sharp;
+using System.Diagnostics;
 using System.Text.Json;
 
 namespace SharpGit.Classes
 {
     public class GitUtils
     {
-        // Tänne viellä ne gitignore template ja muut.
-        // Funktio joka sitten tekee sen annetulla numerolla (esim. 1 = vstudio, 2 = node, 3 = python jne)
-
         /// <summary>
         /// 
         /// 
@@ -70,6 +68,39 @@ namespace SharpGit.Classes
                 var json = File.ReadAllText(configPath);
                 return JsonSerializer.Deserialize<SharpGitConfig>(json) ?? new SharpGitConfig();
             }
+        }
+
+        public static bool HasSSHKeygen()
+        {
+            try
+            {
+                var path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                var sharpgitDir = Path.Combine(path, ".sharpgit");
+                var sshKeyDir = Path.Combine(sharpgitDir, "ssh");
+                if (!Directory.Exists(sshKeyDir))
+                    Directory.CreateDirectory(sshKeyDir);
+
+                var sshKeyName = Path.Combine(sshKeyDir, "SharpHub_key");
+
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "ssh-keygen",
+                    Arguments = sshKeyName,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                };
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static string GetSSHKey(string filePath)
+        {
+            return File.ReadAllText(filePath).Trim();
         }
     }
 }
