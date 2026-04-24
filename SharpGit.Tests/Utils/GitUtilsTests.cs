@@ -48,4 +48,22 @@ public class GitUtilsTests
 				Directory.Delete(TestingPath, true);
 		}
 	}
+
+	[Fact()]
+	public void JokuSSHkey()
+	{
+		try
+		{
+			bool result = GitUtils.HasSSHKeygen();
+			Assert.True(result);
+		}
+		finally
+		{
+			if (File.Exists("/home/welho/.sharpgit/ssh/SharpHub_key") || File.Exists("/home/welho/.sharpgit/ssh/SharpHub_key.pub"))
+			{
+				File.Delete("/home/welho/.sharpgit/ssh/SharpHub_key");
+				File.Delete("/home/welho/.sharpgit/ssh/SharpHub_key.pub");
+			}
+		}
+	}
 }

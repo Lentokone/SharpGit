@@ -81,15 +81,17 @@ namespace SharpGit.Classes
                     Directory.CreateDirectory(sshKeyDir);
 
                 var sshKeyName = Path.Combine(sshKeyDir, "SharpHub_key");
-
+                Console.WriteLine(sshKeyName);
                 var psi = new ProcessStartInfo
                 {
                     FileName = "ssh-keygen",
-                    Arguments = sshKeyName,
+                    Arguments = $"-f {sshKeyName} -N \"\" ",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                 };
+                var process = Process.Start(psi);
+                process.WaitForExit();
                 return true;
             }
             catch
