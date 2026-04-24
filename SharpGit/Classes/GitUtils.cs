@@ -91,7 +91,8 @@ namespace SharpGit.Classes
                     RedirectStandardError = true,
                 };
                 var process = Process.Start(psi);
-                process.WaitForExit();
+                if (process != null)
+                    process.WaitForExit();
                 return true;
             }
             catch
