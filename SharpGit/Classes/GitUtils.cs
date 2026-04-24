@@ -105,5 +105,13 @@ namespace SharpGit.Classes
         {
             return File.ReadAllText(filePath).Trim();
         }
+        // <summary>
+        // This function will check if the user is logged in, has a valid JWT token, has an SSH key.
+        //
+        // </summary>
+        public static bool UserIsValid()
+        {
+            return false;
+        }
     }
 }

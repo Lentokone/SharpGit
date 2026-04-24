@@ -50,7 +50,7 @@ public class GitUtilsTests
 	}
 
 	[Fact()]
-	public void JokuSSHkey()
+	public void HasSSHKeygen_Works()
 	{
 		try
 		{

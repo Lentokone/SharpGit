@@ -39,13 +39,7 @@ namespace SharpGit.Classes
             Console.WriteLine("Give your password");
             var password = Console.ReadLine();
             // Generate SSH key for server
-            var psi = new ProcessStartInfo
-            {
-                FileName = "/usr/bin/alacritty",
-                Arguments = "-e ls",
-                UseShellExecute = false,
-            };
-            Process.Start(psi);
+            GitUtils.HasSSHKeygen();
             // Send credentials and public ssh key, with HTTP to server's endpoint for validation
             // Get JWT token and username and email in return
             // Store username and email in .sharpgit/config.json
