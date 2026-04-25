@@ -19,15 +19,6 @@ namespace SharpGit.Classes
         // Muuttaa sen kunnolliseen remotePath muotoon.
         // "kayttis@server:/home/kayttis/shubrepos/Lentokone/FSWADP..."
         //
-        // 25/02/2026
-        // Noin tehdään koska tämä Git välinen liikenne toimii ssh kautta
-        //
-        //Moro. 12/03/2026 Olli tässä
-        //Ei mitään tietoa mitä tuo ylempi tarkoitti
-
-        // Terve. 1/04/2026 Olli tässä
-        // Ei vieläkään mitään ymmärrystä tosta
-        //
         // Push through
         public static void Login()
         {

@@ -108,6 +108,9 @@ namespace SharpGit.Classes
         // <summary>
         // This function will check if the user is logged in, has a valid JWT token, has an SSH key.
         //
+        //
+        //Unfinished
+        //
         // </summary>
         public static bool UserIsValid()
         {
