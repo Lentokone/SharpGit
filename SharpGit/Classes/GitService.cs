@@ -2,6 +2,8 @@
 using System.Data;
 using System.Globalization;
 using System.Diagnostics;
+using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace SharpGit.Classes
 {
@@ -20,7 +22,7 @@ namespace SharpGit.Classes
         // "kayttis@server:/home/kayttis/shubrepos/Lentokone/FSWADP..."
         //
         // Push through
-        public static void Login()
+        public async static void Login()
         {
             // Ask credentials
             Console.WriteLine("LOGIN");
@@ -32,6 +34,15 @@ namespace SharpGit.Classes
             // Generate SSH key for server
             GitUtils.HasSSHKeygen();
             // Send credentials and public ssh key, with HTTP to server's endpoint for validation
+            //
+            var payload = new
+            {
+                username = username,
+                password = password,
+                sshKey = GitUtils.GetSSHKey()
+            };
+            var client = new HttpClient();
+            var response = await client.PostAsJsonAsync("https://192.168.1.114/login", payload);
             // Get JWT token and username and email in return
             // Store username and email in .sharpgit/config.json
             // Store JWT token there too, with token expiration time 

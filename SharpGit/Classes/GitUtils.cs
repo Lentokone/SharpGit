@@ -100,9 +100,14 @@ namespace SharpGit.Classes
             }
         }
 
-        public static string GetSSHKey(string filePath)
+        public static string GetSSHKey()
         {
-            return File.ReadAllText(filePath).Trim();
+            var path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            var sharpgitDir = Path.Combine(path, ".sharpgit");
+            var sshKeyDir = Path.Combine(sharpgitDir, "ssh");
+
+            var sshKeyName = Path.Combine(sshKeyDir, "SharpHub_key.pub");
+            return File.ReadAllText(sshKeyName).Trim();
         }
         // <summary>
         // This function will check if the user is logged in, has a valid JWT token, has an SSH key.
