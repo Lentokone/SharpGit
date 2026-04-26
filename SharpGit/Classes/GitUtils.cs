@@ -81,7 +81,6 @@ namespace SharpGit.Classes
                     Directory.CreateDirectory(sshKeyDir);
 
                 var sshKeyName = Path.Combine(sshKeyDir, "SharpHub_key");
-                Console.WriteLine(sshKeyName);
                 var psi = new ProcessStartInfo
                 {
                     FileName = "ssh-keygen",

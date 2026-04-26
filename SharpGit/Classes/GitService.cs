@@ -61,7 +61,8 @@ namespace SharpGit.Classes
                 var statuses = repo.RetrieveStatus();
                 var filtered = statuses
                     .Where(i =>
-                        (i.State & (FileStatus.ModifiedInWorkdir | FileStatus.DeletedFromWorkdir | FileStatus.TypeChangeInWorkdir | FileStatus.RenamedInWorkdir)) != 0);
+                        (i.State & (FileStatus.ModifiedInWorkdir | FileStatus.DeletedFromWorkdir
+                                    | FileStatus.TypeChangeInWorkdir | FileStatus.RenamedInWorkdir)) != 0);
 
                 foreach (var item in filtered)
                 {
@@ -116,7 +117,7 @@ namespace SharpGit.Classes
                 var name = config.User.Name;
                 var email = config.User.Email;
 
-                Signature author = new Signature(name, email, DateTime.Now);
+                Signature author = new(name, email, DateTime.Now);
                 Signature committer = author;
 
                 Commit commit = repo.Commit(message, author, committer);
@@ -186,8 +187,12 @@ namespace SharpGit.Classes
                         // Muista lisätä tänne ssh avain hommat ja muut
                     }
                 };
-                var signature = new LibGit2Sharp.Signature(
-                    new Identity("MERGE_USER_NAME", "MERGE_USER_EMAIL"), DateTimeOffset.Now);
+                var config = GitUtils.GetConfig();
+                var name = config.User.Name;
+                var email = config.User.Email;
+
+                var signature = new Signature(
+                    new Identity(name, email), DateTimeOffset.Now);
 
                 var result = Commands.Pull(repo, signature, pullOptions);
 
