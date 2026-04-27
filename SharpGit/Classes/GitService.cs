@@ -22,6 +22,13 @@ namespace SharpGit.Classes
         // "kayttis@server:/home/kayttis/shubrepos/Lentokone/FSWADP..."
         //
         // Push through
+        //
+        // Changes:::
+        // No JWT tokens at all
+        // Login will send username and password
+        // Generates SSH key
+        // Sends payload consisting of login creds and SSH key
+        // Gets whatever was meant to get as response, but excluding JWT token
         public async static void Login()
         {
             // Ask credentials
