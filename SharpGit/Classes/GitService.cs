@@ -50,9 +50,11 @@ namespace SharpGit.Classes
             };
             var client = new HttpClient();
             var response = await client.PostAsJsonAsync("https://192.168.1.114/login", payload);
-            // Get JWT token and username and email in return
+            response.EnsureSuccessStatusCode();
+
+            // Maybe redundant to have it as the object's form
+            var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
             // Store username and email in .sharpgit/config.json
-            // Store JWT token there too, with token expiration time 
 
             //Lastly, wrap every single function to be checking for the JWT token, if not, then prompting login credentials
             //Login could just be for cloning, push/pull, and so.
