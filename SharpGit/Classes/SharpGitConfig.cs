@@ -1,5 +1,7 @@
-public class SharpGitConfig
+public record SharpGitConfig
 {
-    public UserConfig User { get; set; } = new();
-    public ServerConfig Server { get; set; } = new();
+    public string Username { get; set; } = "unset";
+    public string Email { get; set; } = "unset";
+    public string ServerAddress { get; set; } = "unset";
+    public string SSHKeyPath { get; set; } = "unset";
 }

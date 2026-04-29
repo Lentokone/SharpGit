@@ -29,21 +29,20 @@ namespace SharpGit.Classes
         // Gets whatever was meant to get as response, but excluding JWT token
         public async static void Login()
         {
-            // Ask credentials
             Console.WriteLine("LOGIN");
             Console.WriteLine("Give your username");
             var username = Console.ReadLine();
 
+            Console.WriteLine("Give your email");
+            var email = Console.ReadLine();
+
             Console.WriteLine("Give your password");
             var password = Console.ReadLine();
-            // Generate SSH key for server
             GitUtils.HasSSHKeygen();
-            // Send credentials and public ssh key, with HTTP to server's endpoint for validation
-            //
             var payload = new
             {
-                username = username,
-                password = password,
+                username,
+                password,
                 sshKey = GitUtils.GetSSHKey()
             };
             var client = new HttpClient();
@@ -132,8 +131,8 @@ namespace SharpGit.Classes
             try
             {
                 var config = GitUtils.GetConfig();
-                var name = config.User.Name;
-                var email = config.User.Email;
+                var name = config.Username;
+                var email = config.Email;
 
                 Signature author = new(name, email, DateTime.Now);
                 Signature committer = author;
@@ -206,8 +205,8 @@ namespace SharpGit.Classes
                     }
                 };
                 var config = GitUtils.GetConfig();
-                var name = config.User.Name;
-                var email = config.User.Email;
+                var name = config.Username;
+                var email = config.Email;
 
                 var signature = new Signature(
                     new Identity(name, email), DateTimeOffset.Now);
