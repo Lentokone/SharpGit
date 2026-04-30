@@ -123,6 +123,24 @@ namespace SharpGit.Classes
             WriteToConfig(config);
         }
 
+        public static (string Username, string Email)? GetUserFromConfig()
+        {
+            try
+            {
+                var path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                var configPath = Path.Combine(path, ".sharpgit", "config.json");
+
+                var json = File.ReadAllText(configPath);
+                var config = JsonSerializer.Deserialize<SharpGitConfig>(json);
+
+                if (config is null)
+                    throw new InvalidOperationException("Invalid config file");
+
+                return (config.Username, config.Email);
+            }
+            catch
+            { return null; }
+        }
         // Function that reads username and email from config.json
         //
         // Function that reads username and email from git repository local config
