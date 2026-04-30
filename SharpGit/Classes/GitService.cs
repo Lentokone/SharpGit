@@ -14,19 +14,9 @@ namespace SharpGit.Classes
             Console.WriteLine($"Initialized empty Git repository in {repoPath}");
         }
 
-        // Tämä hyväksymään sen argumentin
-        // Ja pilkkoo sen urlin. Esimerkillä tämän projektin repo "https://github.com/Lentokone/FSWADP_Console_side"
-        // Muuttaa sen kunnolliseen remotePath muotoon.
-        // "kayttis@server:/home/kayttis/shubrepos/Lentokone/FSWADP..."
         //
         // Push through
         //
-        // Changes:::
-        // No JWT tokens at all
-        // Login will send username and password
-        // Generates SSH key
-        // Sends payload consisting of login creds and SSH key
-        // Gets whatever was meant to get as response, but excluding JWT token
         public async static void Login()
         {
             Console.WriteLine("LOGIN");
@@ -38,23 +28,32 @@ namespace SharpGit.Classes
 
             Console.WriteLine("Give your password");
             var password = Console.ReadLine();
+
             GitUtils.HasSSHKeygen();
             var payload = new
             {
                 username,
                 password,
-                sshKey = GitUtils.GetSSHKey()
+                sshkey = GitUtils.GetSSHKey()
             };
             var client = new HttpClient();
-            var response = await client.PostAsJsonAsync("https://192.168.1.114/login", payload);
-            response.EnsureSuccessStatusCode();
+            try
+            {
+                // Tähän että hakee sen server address config.json:ista
+                var response = await client.PostAsJsonAsync("https://192.168.1.114/login", payload);
 
-            // Maybe redundant to have it as the object's form
-            var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
-            // Store username and email in .sharpgit/config.json
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("Initial setup successful!");
 
-            //Lastly, wrap every single function to be checking for the JWT token, if not, then prompting login credentials
-            //Login could just be for cloning, push/pull, and so.
+                    if (username != null && email != null)
+                        GitUtils.SaveUserToConfig(username, email);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Could not connect to the server: " + ex.Message);
+            }
         }
 
         public static GitResult AddToRepo(Repository repo, string filePath)

@@ -59,6 +59,7 @@ namespace SharpGit.Classes
                 return JsonSerializer.Deserialize<SharpGitConfig>(json) ?? new SharpGitConfig();
             }
         }
+
         public static void WriteToConfig(SharpGitConfig config)
         {
             var path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
@@ -121,6 +122,13 @@ namespace SharpGit.Classes
             config.Email = email;
             WriteToConfig(config);
         }
+
+        // Function that reads username and email from config.json
+        //
+        // Function that reads username and email from git repository local config
+        //
+        // Function that writes username and email to git repository local config
+
 
         // <summary>
         // This function will check if the user is logged in, has a valid JWT token, has an SSH key.
