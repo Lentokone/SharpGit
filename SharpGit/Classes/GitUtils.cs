@@ -141,12 +141,20 @@ namespace SharpGit.Classes
             catch
             { return null; }
         }
-        // Function that reads username and email from config.json
-        //
-        // Function that reads username and email from git repository local config
-        //
-        // Function that writes username and email to git repository local config
 
+        public static (string Username, string Email) GetUserFromLocalRepo(Repository repo)
+        {
+            return (
+                    repo.Config.Get<string>("user.name").Value,
+                    repo.Config.Get<string>("user.email").Value
+                    );
+        }
+
+        public static void WriteUserToLocalRepo(Repository repo, string Username, string Email)
+        {
+            repo.Config.Set("user.name", Username, ConfigurationLevel.Local);
+            repo.Config.Set("user.email", Email, ConfigurationLevel.Local);
+        }
 
         // <summary>
         // This function will check if the user is logged in, has a valid JWT token, has an SSH key.

@@ -129,9 +129,9 @@ namespace SharpGit.Classes
         {
             try
             {
-                var config = GitUtils.GetConfig();
-                var name = config.Username;
-                var email = config.Email;
+                var User = GitUtils.GetUserFromLocalRepo(repo);
+                var name = User.Username;
+                var email = User.Email;
 
                 Signature author = new(name, email, DateTime.Now);
                 Signature committer = author;
