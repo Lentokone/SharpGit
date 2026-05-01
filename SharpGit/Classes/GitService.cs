@@ -129,9 +129,7 @@ namespace SharpGit.Classes
         {
             try
             {
-                var User = GitUtils.GetUserFromLocalRepo(repo);
-                var name = User.Username;
-                var email = User.Email;
+                var (name, email) = GitUtils.GetUserFromLocalRepo(repo);
 
                 Signature author = new(name, email, DateTime.Now);
                 Signature committer = author;
@@ -189,9 +187,6 @@ namespace SharpGit.Classes
             }
         }
 
-        //TODO: Refactor this
-        // Ei ole testattu
-        // 19/01/ 22:25, testattu, toimii
         public static GitResult PullFromRepo(Repository repo)
         {
             try
@@ -203,9 +198,7 @@ namespace SharpGit.Classes
                         // Muista lisätä tänne ssh avain hommat ja muut
                     }
                 };
-                var config = GitUtils.GetConfig();
-                var name = config.Username;
-                var email = config.Email;
+                var (name, email) = GitUtils.GetUserFromLocalRepo(repo);
 
                 var signature = new Signature(
                     new Identity(name, email), DateTimeOffset.Now);
@@ -225,7 +218,6 @@ namespace SharpGit.Classes
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Merge conflicts detected! Please resolve them manually.");
                     Console.ResetColor();
-                    // Optionally: List conflicted files-
                     foreach (var conflict in repo.Index.Conflicts)
                     {
                         string path = conflict.Ours?.Path ?? conflict.Theirs?.Path ?? conflict.Ancestor?.Path ?? "(unknown path)";
@@ -277,20 +269,29 @@ namespace SharpGit.Classes
                 }
 
                 // Changes to be committed (staged files)
-                if (itemStatusesList.Any(s => s.Contains("NewInIndex") || s.Contains("ModifiedInIndex") || s.Contains("RenamedInIndex") || s.Contains("DeletedFromIndex")))
+                if (itemStatusesList.Any(s => s.Contains("NewInIndex") ||
+                            s.Contains("ModifiedInIndex") ||
+                            s.Contains("RenamedInIndex") ||
+                            s.Contains("DeletedFromIndex")))
                 {
                     Console.WriteLine("\nChanges to be committed:");
 
                     foreach (var item in statuses)
                     {
-                        if ((item.State & (FileStatus.NewInIndex | FileStatus.ModifiedInIndex | FileStatus.RenamedInIndex | FileStatus.DeletedFromIndex)) != 0)
+                        if ((item.State & (FileStatus.NewInIndex |
+                                        FileStatus.ModifiedInIndex |
+                                        FileStatus.RenamedInIndex |
+                                        FileStatus.DeletedFromIndex)) != 0)
                         {
                             Console.WriteLine($"        {item.FilePath}");
                         }
                     }
                 }
 
-                if (itemStatusesList.Any(s => s.Contains("NewInIndex") || s.Contains("ModifiedInWorkdir") || s.Contains("RenamedInIndex") || s.Contains("DeletedFromIndex")))
+                if (itemStatusesList.Any(s => s.Contains("NewInIndex") ||
+                            s.Contains("ModifiedInWorkdir") ||
+                            s.Contains("RenamedInIndex") ||
+                            s.Contains("DeletedFromIndex")))
                 {
                     Console.WriteLine("\nChanges not staged for commit:");
                     Console.WriteLine($"  (use \"git add <file>...\" to update what will be committed)");

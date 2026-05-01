@@ -512,7 +512,6 @@ public class GitServiceTests
 
 			repo.Index.Add("test1.txt");
 			repo.Index.Write();
-
 			GitService.CommitToRepo(repo, "Testing");
 			var status = repo.RetrieveStatus();
 			Assert.Empty(status);
