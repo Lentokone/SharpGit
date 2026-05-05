@@ -6,10 +6,6 @@ namespace SharpGit.Classes
 {
     public class GitUtils
     {
-        /// <summary>
-        /// 
-        /// 
-        /// </summary>
         public static Repository? TryFindRepositoryFromCurrentDirectory()
         {
             var dir = new DirectoryInfo(Directory.GetCurrentDirectory());
@@ -45,32 +41,47 @@ namespace SharpGit.Classes
 
         public static SharpGitConfig GetConfig()
         {
-            var path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            var sharpgitDir = Path.Combine(path, ".sharpgit");
-            var configPath = Path.Combine(sharpgitDir, "config.json");
+            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".sharpgit");
+            var configPath = Path.Combine(path, "config.json");
 
             if (!File.Exists(configPath))
-            {
                 return CreateDefaultConfig();
-            }
-            else
+            try
             {
                 var json = File.ReadAllText(configPath);
-                return JsonSerializer.Deserialize<SharpGitConfig>(json) ?? new SharpGitConfig();
+                return JsonSerializer.Deserialize<SharpGitConfig>(json) ?? CreateDefaultConfig();
+            }
+            catch
+            {
+                return CreateDefaultConfig();
             }
         }
 
         public static void WriteToConfig(SharpGitConfig config)
         {
-            var path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            var sharpgitDir = Path.Combine(path, ".sharpgit");
-            var configPath = Path.Combine(sharpgitDir, "config.json");
+            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".sharpgit");
+            var configPath = Path.Combine(path, "config.json");
+
+            Directory.CreateDirectory(path);
 
             var json = JsonSerializer.Serialize(
                 config,
                 new JsonSerializerOptions { WriteIndented = true }
             );
             File.WriteAllText(configPath, json);
+        }
+
+        public static void UpdateLocalConfig(string? username = null, string? email = null, string? serverAddress = null)
+        {
+            var config = GetConfig();
+            if (username != null)
+                config.Username = username;
+            if (email != null)
+                config.Email = email;
+            if (serverAddress != null)
+                config.ServerAddress = serverAddress;
+
+            WriteToConfig(config);
         }
 
         // Rename and refactor this
@@ -112,34 +123,6 @@ namespace SharpGit.Classes
 
             var sshKeyName = Path.Combine(sshKeyDir, "SharpHub_key.pub");
             return File.ReadAllText(sshKeyName).Trim();
-        }
-
-        public static void SaveUserToConfig(string username, string email)
-        {
-            var config = GetConfig();
-
-            config.Username = username;
-            config.Email = email;
-            WriteToConfig(config);
-        }
-
-        public static (string Username, string Email)? GetUserFromConfig()
-        {
-            try
-            {
-                var path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                var configPath = Path.Combine(path, ".sharpgit", "config.json");
-
-                var json = File.ReadAllText(configPath);
-                var config = JsonSerializer.Deserialize<SharpGitConfig>(json);
-
-                if (config is null)
-                    throw new InvalidOperationException("Invalid config file");
-
-                return (config.Username, config.Email);
-            }
-            catch
-            { return null; }
         }
 
         public static (string Username, string Email) GetUserFromLocalRepo(Repository repo)

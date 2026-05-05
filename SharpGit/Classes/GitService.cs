@@ -47,7 +47,9 @@ namespace SharpGit.Classes
                     Console.WriteLine("Initial setup successful!");
 
                     if (username != null && email != null)
-                        GitUtils.SaveUserToConfig(username, email);
+                    {
+                        GitUtils.UpdateLocalConfig(username, email);
+                    }
                 }
             }
             catch (Exception ex)
