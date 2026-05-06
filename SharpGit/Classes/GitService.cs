@@ -42,8 +42,9 @@ namespace SharpGit.Classes
             var client = new HttpClient();
             try
             {
-                // Tähän että hakee sen server address config.json:ista
-                var response = await client.PostAsJsonAsync("https://192.168.1.114/login", payload);
+                var config = GitUtils.GetConfig();
+                var loginAddress = Path.Combine(config.ServerAddress, "login");
+                var response = await client.PostAsJsonAsync(loginAddress, payload);
 
                 if (response.IsSuccessStatusCode)
                 {
