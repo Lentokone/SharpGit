@@ -24,11 +24,10 @@ namespace SharpGit.Classes
 
         private static SharpGitConfig CreateDefaultConfig()
         {
-            var path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            var sharpgitDir = Path.Combine(path, ".sharpgit");
-            var configPath = Path.Combine(sharpgitDir, "config.json");
-            if (!Directory.Exists(sharpgitDir))
-                Directory.CreateDirectory(sharpgitDir);
+            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".sharpgit");
+            var configPath = Path.Combine(path, "config.json");
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
 
             var config = new SharpGitConfig();
             var json = JsonSerializer.Serialize(
@@ -71,7 +70,7 @@ namespace SharpGit.Classes
             File.WriteAllText(configPath, json);
         }
 
-        public static void UpdateLocalConfig(string? username = null, string? email = null, string? serverAddress = null)
+        public static void UpdateLocalConfig(string? username = null, string? email = null, string? serverAddress = null, string? sshKeyPath = null)
         {
             var config = GetConfig();
             if (username != null)
@@ -80,10 +79,15 @@ namespace SharpGit.Classes
                 config.Email = email;
             if (serverAddress != null)
                 config.ServerAddress = serverAddress;
+            if (sshKeyPath != null)
+                config.SSHKeyPath = sshKeyPath;
 
             WriteToConfig(config);
         }
 
+        // Add functionality here to:::
+        //TODO: Write the ssh key path into the config.json/SSHKeyPath
+        //
         // Rename and refactor this
         public static bool HasSSHKeygen()
         {

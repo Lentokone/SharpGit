@@ -17,17 +17,20 @@ namespace SharpGit.Classes
         //
         // Push through
         //
+        //No en tiiä
+        //Ehkä Refactor tästä initial setup / joku muu funktio kun login
+        //koska tää tekee jo aika paljon muuta kun vain login
         public async static void Login()
         {
             Console.WriteLine("LOGIN");
             Console.WriteLine("Give your username");
             var username = Console.ReadLine();
 
-            Console.WriteLine("Give your email");
-            var email = Console.ReadLine();
-
             Console.WriteLine("Give your password");
             var password = Console.ReadLine();
+
+            Console.WriteLine("Give your email");
+            var email = Console.ReadLine();
 
             GitUtils.HasSSHKeygen();
             var payload = new
