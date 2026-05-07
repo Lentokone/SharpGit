@@ -85,21 +85,16 @@ namespace SharpGit.Classes
             WriteToConfig(config);
         }
 
-        // Add functionality here to:::
-        //TODO: Write the ssh key path into the config.json/SSHKeyPath
-        //
-        // Rename and refactor this
-        public static bool HasSSHKeygen()
+        public static bool SSHKeyGeneration()
         {
             try
             {
-                var path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                var sharpgitDir = Path.Combine(path, ".sharpgit");
-                var sshKeyDir = Path.Combine(sharpgitDir, "ssh");
-                if (!Directory.Exists(sshKeyDir))
-                    Directory.CreateDirectory(sshKeyDir);
+                var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".sharpgit");
+                var sshDir = Path.Combine(path, "ssh");
+                if (!Directory.Exists(sshDir))
+                    Directory.CreateDirectory(sshDir);
 
-                var sshKeyName = Path.Combine(sshKeyDir, "SharpHub_key");
+                var sshKeyName = Path.Combine(sshDir, "SharpHub_key");
                 var psi = new ProcessStartInfo
                 {
                     FileName = "ssh-keygen",
@@ -111,6 +106,10 @@ namespace SharpGit.Classes
                 var process = Process.Start(psi);
                 if (process != null)
                     process.WaitForExit();
+
+                var config = GetConfig();
+                config.SSHKeyPath = sshKeyName;
+                WriteToConfig(config);
                 return true;
             }
             catch
@@ -141,18 +140,6 @@ namespace SharpGit.Classes
         {
             repo.Config.Set("user.name", Username, ConfigurationLevel.Local);
             repo.Config.Set("user.email", Email, ConfigurationLevel.Local);
-        }
-
-        // <summary>
-        // This function will check if the user is logged in, has a valid JWT token, has an SSH key.
-        //
-        //
-        //Unfinished
-        //
-        // </summary>
-        public static bool UserIsValid()
-        {
-            return false;
         }
     }
 }

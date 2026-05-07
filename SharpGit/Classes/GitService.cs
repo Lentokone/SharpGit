@@ -32,7 +32,7 @@ namespace SharpGit.Classes
             Console.WriteLine("Give your email");
             var email = Console.ReadLine();
 
-            GitUtils.HasSSHKeygen();
+            GitUtils.SSHKeyGeneration();
             var payload = new
             {
                 username,

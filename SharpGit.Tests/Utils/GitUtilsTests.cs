@@ -54,7 +54,7 @@ public class GitUtilsTests
 	{
 		try
 		{
-			bool result = GitUtils.HasSSHKeygen();
+			bool result = GitUtils.SSHKeyGeneration();
 			Assert.True(result);
 		}
 		finally
