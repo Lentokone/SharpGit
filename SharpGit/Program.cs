@@ -1,8 +1,6 @@
-﻿using LibGit2Sharp;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using SharpGit.Classes;
 
 ////! Eli se libgit2sharp
@@ -11,40 +9,6 @@ using SharpGit.Classes;
 
 //TODO Muista ottaa nuo writelinet pois
 
-//NOTE 25/02/2026
-//
-// Aika tehdä loppuun
-// Yritän tähdätä viikon eteenpäin deadlinen.
-// Eli 4/03/2026
-
-// Nonni
-// Vähän ajatuksia tänne, etten unohda.
-// Eli tässä tulee myös login
-// Kun clone, push,pull jne. niin se kysyy käyttäjätunnuksen ja salasanan.
-// Lähetetään se MVC endpoint, joka palauttaa ssh key ja short lived token
-// Ja se tallennetaan johonkin, että ei tarvi joka kerta kysyä.
-
-// Kun on action time, se tarkistaa tokenin ja sitten tekee magiaa
-
-// Eli tulen tarviimaan jonkinsorting .sharpgit, johon tallennetaan ssh keyt ja config.json
-// Joka on muotoa.
-
-/*
-{
-  "monkey": {
-    "username": "veijari",
-    "token": "token_for_monkey",
-    "token_expires": "2025-05-22T01:00:00Z",
-    "ssh_key_path": "/home/user/.sharpgit/keys/monkey"
-  },
-  "giraffe": {
-    "username": "veijari",
-    "token": "token_for_giraffe",
-    "token_expires": "2025-05-24T01:00:00Z",
-    "ssh_key_path": "/home/user/.sharpgit/keys/giraffe"
-  }
-}
-*/
 namespace SharpGit;
 
 class Program
@@ -53,7 +17,12 @@ class Program
     {
         var rootCommand = new RootCommand("SharpGit CLI - a minimal git-like tool");
 
-
+        // Refactor name and something to be more reasonable
+        var loginCommand = new Command("login", "name is temporary for now!!!!");
+        loginCommand.SetHandler(() =>
+        {
+            Console.WriteLine("Does this work?");
+        });
         // init
         var initCommand = new Command("init", "Initialize a new repository. Unsupported for now.");
         initCommand.SetHandler(() =>
@@ -89,7 +58,6 @@ class Program
             if (repo == null)
             {
                 Environment.Exit(1);
-                return;
             }
             if (update)
             {
@@ -108,10 +76,10 @@ class Program
             }
             if (!result.Success)
             {
-                Environment.Exit(1);
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"{result.Message}");
                 Console.ResetColor();
+                Environment.Exit(1);
             }
         }, updateOption, allOption, addPathArg);
 
@@ -126,7 +94,6 @@ class Program
             if (repo == null)
             {
                 Environment.Exit(1);
-                return;
             }
 
         }, removePathArg);
@@ -147,18 +114,17 @@ class Program
             var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
             if (repo == null)
             {
-                Environment.Exit(1);
                 Console.WriteLine("No repository found in the current directory.");
-                return;
+                Environment.Exit(1);
             }
             Console.WriteLine($"{message}");
             var result = GitService.CommitToRepo(repo, message);
             if (!result.Success)
             {
-                Environment.Exit(1);
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(result.Message);
                 Console.ResetColor();
+                Environment.Exit(1);
             }
         }, messageOption);
 
@@ -176,9 +142,9 @@ class Program
             if (!result.Success)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Environment.Exit(1);
                 Console.WriteLine(result.Message);
                 Console.ResetColor();
+                Environment.Exit(1);
             }
         }, repoUrlArg, targetDirArg);
 
@@ -191,18 +157,17 @@ class Program
             var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
             if (repo == null)
             {
-                Environment.Exit(1);
                 Console.WriteLine("No repository found in the current directory.");
-                return;
+                Environment.Exit(1);
             }
             var result = GitService.PushToRepo(repo);
             Console.WriteLine("Pushing successful");
             if (!result.Success)
             {
-                Environment.Exit(1);
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(result.Message);
                 Console.ResetColor();
+                Environment.Exit(1);
             }
         });
 
@@ -215,18 +180,17 @@ class Program
             var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
             if (repo == null)
             {
-                Environment.Exit(1);
                 Console.WriteLine("No repository found in the current directory.");
-                return;
+                Environment.Exit(1);
             }
             var result = GitService.PullFromRepo(repo);
 
             if (!result.Success)
             {
-                Environment.Exit(1);
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(result.Message);
                 Console.ResetColor();
+                Environment.Exit(1);
             }
         });
 
@@ -239,17 +203,16 @@ class Program
             var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
             if (repo == null)
             {
-                Environment.Exit(1);
                 Console.WriteLine("No repository found in the current directory.");
-                return;
+                Environment.Exit(1);
             }
             var result = GitService.DisplayGitStatus(repo);
             if (!result.Success)
             {
-                Environment.Exit(1);
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(result.Message);
                 Console.ResetColor();
+                Environment.Exit(1);
             }
         });
 
@@ -262,17 +225,16 @@ class Program
             var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
             if (repo == null)
             {
-                Environment.Exit(1);
                 Console.WriteLine("No repository found in the current directory.");
-                return;
+                Environment.Exit(1);
             }
             var result = GitService.DisplayLog(repo, length);
             if (!result.Success)
             {
-                Environment.Exit(1);
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(result.Message);
                 Console.ResetColor();
+                Environment.Exit(1);
             }
         }, logLengthArgument);
 
@@ -286,6 +248,7 @@ class Program
 
         // Add all to root
         rootCommand.AddCommand(initCommand);
+        rootCommand.AddCommand(loginCommand);
         rootCommand.AddCommand(addCommand);
         rootCommand.AddCommand(removeCommand);
         rootCommand.AddCommand(commitCommand);

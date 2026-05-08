@@ -1,8 +1,4 @@
-/// <summary>
-///
-///
-/// </summary>
-public class GitResult
+public record GitResult
 {
 	public bool Success { get; init; }
 	public string? Message { get; init; }

@@ -72,7 +72,7 @@ namespace SharpGit.Classes
             }
             catch (Exception ex)
             {
-                return GitResult.Fail("Failed to add '{filePath}' to repository", ex);
+                return GitResult.Fail($"Failed to add '{filePath}' to repository", ex);
             }
         }
 
