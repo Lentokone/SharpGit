@@ -20,7 +20,7 @@ namespace SharpGit.Classes
         //No en tiiä
         //Ehkä Refactor tästä initial setup / joku muu funktio kun login
         //koska tää tekee jo aika paljon muuta kun vain login
-        public async static void Login()
+        public static async Task Login()
         {
             Console.WriteLine("LOGIN");
             Console.WriteLine("Give your username");
@@ -32,29 +32,41 @@ namespace SharpGit.Classes
             Console.WriteLine("Give your email");
             var email = Console.ReadLine();
 
-            GitUtils.SSHKeyGeneration();
-            var payload = new
+            if (string.IsNullOrWhiteSpace(username) ||
+                    string.IsNullOrWhiteSpace(password) ||
+                    string.IsNullOrWhiteSpace(email))
             {
-                username,
-                password,
-                sshkey = GitUtils.GetSSHKey()
-            };
-            var client = new HttpClient();
+                Console.WriteLine("Invalid input.");
+                return;
+            }
+
             try
             {
                 var config = GitUtils.GetConfig();
-                var loginAddress = Path.Combine(config.ServerAddress, "login");
-                var response = await client.PostAsJsonAsync(loginAddress, payload);
+                var loginAddress = config.ServerAddress.TrimEnd('/') + "/cli/login";
 
-                if (response.IsSuccessStatusCode)
+                if (!GitUtils.HasSSHKey())
+                    GitUtils.SSHKeyGeneration();
+                var payload = new
                 {
-                    Console.WriteLine("Initial setup successful!");
+                    username,
+                    password,
+                    sshkey = GitUtils.GetSSHKey()
+                };
+                using var client = new HttpClient();
+                {
 
-                    if (username != null && email != null)
+                    var response = await client.PostAsJsonAsync(loginAddress, payload);
+
+                    if (!response.IsSuccessStatusCode)
                     {
-                        GitUtils.UpdateLocalConfig(username, email);
+                        Console.WriteLine("Login failed");
+                        return;
                     }
                 }
+                GitUtils.UpdateLocalConfig(username, email);
+
+                Console.WriteLine("Initial setup successful!");
             }
             catch (Exception ex)
             {

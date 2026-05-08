@@ -118,6 +118,18 @@ namespace SharpGit.Classes
             }
         }
 
+        public static bool HasSSHKey()
+        {
+            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".sharpgit");
+            var sshKeyDir = Path.Combine(path, "ssh");
+
+            var sshKeyName = Path.Combine(sshKeyDir, "SharpHub_key.pub");
+            if (File.Exists(sshKeyName))
+                return true;
+            else
+                return false;
+        }
+
         public static string GetSSHKey()
         {
             var path = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
