@@ -19,10 +19,11 @@ class Program
 
         // Refactor name and something to be more reasonable
         var loginCommand = new Command("login", "name is temporary for now!!!!");
-        loginCommand.SetHandler(() =>
+        loginCommand.SetHandler(async () =>
         {
-            Console.WriteLine("Does this work?");
+            await GitService.Login();
         });
+
         // init
         var initCommand = new Command("init", "Initialize a new repository. Unsupported for now.");
         initCommand.SetHandler(() =>
