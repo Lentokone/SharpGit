@@ -136,17 +136,20 @@ class Program
         var targetDirArg = new Argument<string?>("path", () => null, "Target directory (optional)");
         cloneCommand.AddArgument(repoUrlArg);
         cloneCommand.AddArgument(targetDirArg);
-        cloneCommand.SetHandler((string url, string? path) =>
+        cloneCommand.SetHandler(async (string url, string? path) =>
         {
-            Console.WriteLine($"Clone command called for: {url}");
-            var result = GitService.CloneRepo(url, path);
-            if (!result.Success)
+            await CommandGuard.Run(async () =>
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(result.Message);
-                Console.ResetColor();
-                Environment.Exit(1);
-            }
+                Console.WriteLine($"Clone command called for: {url}");
+                var result = GitService.CloneRepo(url, path);
+                if (!result.Success)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(result.Message);
+                    Console.ResetColor();
+                    Environment.Exit(1);
+                }
+            });
         }, repoUrlArg, targetDirArg);
 
         // push
@@ -260,6 +263,7 @@ class Program
         rootCommand.AddCommand(logCommand);
         rootCommand.AddCommand(SetRemoteCommand);
 
+        await CommandBootstrapper.EnsureReady();
         return await rootCommand.InvokeAsync(args);
     }
 }

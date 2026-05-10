@@ -22,7 +22,17 @@ namespace SharpGit.Classes
             return null;
         }
 
-        private static SharpGitConfig CreateDefaultConfig()
+        public static bool ConfigExists()
+        {
+            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".sharpgit");
+            var configPath = Path.Combine(path, "config.json");
+            if (File.Exists(configPath))
+                return true;
+
+            return false;
+        }
+
+        public static SharpGitConfig CreateDefaultConfig()
         {
             var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".sharpgit");
             var configPath = Path.Combine(path, "config.json");
