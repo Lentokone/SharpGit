@@ -55,7 +55,6 @@ namespace SharpGit.Classes
                 };
                 using var client = new HttpClient();
                 {
-
                     var response = await client.PostAsJsonAsync(loginAddress, payload);
 
                     if (!response.IsSuccessStatusCode)
@@ -166,14 +165,22 @@ namespace SharpGit.Classes
         //
         //NOTE: Make this delete the directory if a clone fails and the directory is empty.
         //NOTE: Second note. This seemingly let's you clone even if the given remote path is not a valid repository
+
+        //TODO: Muista jotain Refactoringering.
+        // Good luck.
+        //
         public static GitResult CloneRepo(string remotePath, string? givenPath = null)
         {
+            var directoryName = remotePath.TrimEnd('/').Split('/').Last();
+            var targetDir = givenPath ?? Directory.GetCurrentDirectory();
+            var fullDirectory = "";
+            bool existedBefore = true;
             try
             {
-                var targetDir = givenPath ?? Directory.GetCurrentDirectory();
-                var directoryName = remotePath.TrimEnd('/').Split('/').Last();
                 if (!Directory.Exists(targetDir))
+                {
                     Directory.CreateDirectory(targetDir);
+                }
                 if (Directory.EnumerateFileSystemEntries(targetDir).Any())
                 {
                     return GitResult.Fail("Given directory was not empty.");
@@ -182,14 +189,17 @@ namespace SharpGit.Classes
                 {
                     directoryName = directoryName[..^4];
                 }
+                fullDirectory = Path.Combine(targetDir, directoryName);
+                existedBefore = Directory.Exists(fullDirectory);
 
-                var fullDirectory = Path.Combine(targetDir, directoryName);
                 Directory.CreateDirectory(fullDirectory);
                 Repository.Clone(remotePath, fullDirectory);
                 return GitResult.Ok();
             }
             catch (Exception ex)
             {
+                if (!existedBefore)
+                    Directory.Delete(fullDirectory);
                 return GitResult.Fail($"Cloning failed with path :{remotePath}", ex);
             }
         }
