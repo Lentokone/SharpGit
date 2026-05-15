@@ -160,15 +160,6 @@ namespace SharpGit.Classes
             }
         }
 
-        // Important notice.
-        // This will create the directory for the given project, but never deletes it if the cloning fails or so.
-        //
-        //NOTE: Make this delete the directory if a clone fails and the directory is empty.
-        //NOTE: Second note. This seemingly let's you clone even if the given remote path is not a valid repository
-
-        //TODO: Muista jotain Refactoringering.
-        // Good luck.
-        //
         public static GitResult CloneRepo(string remotePath, string? givenPath = null)
         {
             var directoryName = remotePath.TrimEnd('/').Split('/').Last();

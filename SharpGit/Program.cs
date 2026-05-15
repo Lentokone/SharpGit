@@ -263,7 +263,8 @@ class Program
         rootCommand.AddCommand(logCommand);
         rootCommand.AddCommand(SetRemoteCommand);
 
-        await CommandBootstrapper.EnsureReady();
+        //NOTE: This is for "global" bootstrapping.
+        // await CommandBootstrapper.EnsureReady();
         return await rootCommand.InvokeAsync(args);
     }
 }
