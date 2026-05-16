@@ -304,77 +304,68 @@ namespace SharpGit.Classes
                 {
                     Console.WriteLine("Your branch is up to date.\n");
                 }
-                var itemStatusesList = new List<string>();
+                var stagedFilesList = new List<StatusEntry>();
+                var unstagedFilesList = new List<StatusEntry>();
+                var untrackedFilesList = new List<StatusEntry>();
 
+                var stagedFlags = FileStatus.NewInIndex |
+                                        FileStatus.ModifiedInIndex |
+                                        FileStatus.RenamedInIndex |
+                                        FileStatus.DeletedFromIndex;
                 foreach (var item in statuses)
                 {
-                    itemStatusesList.Add(item.State.ToString());
+                    if ((item.State & stagedFlags) != 0)
+                        stagedFilesList.Add(item);
+                    if ((item.State & FileStatus.ModifiedInWorkdir) != 0)
+                        unstagedFilesList.Add(item);
+                    if ((item.State & FileStatus.NewInWorkdir) != 0 && (item.State & FileStatus.Ignored) == 0)
+                        untrackedFilesList.Add(item);
                 }
-
+                foreach (var item in untrackedFilesList)
+                {
+                    Console.WriteLine(item.State + " " + item.FilePath);
+                    Console.WriteLine("Is this not even called?");
+                }
                 // Changes to be committed (staged files)
-                if (itemStatusesList.Any(s => s.Contains("NewInIndex") ||
-                            s.Contains("ModifiedInIndex") ||
-                            s.Contains("RenamedInIndex") ||
-                            s.Contains("DeletedFromIndex")))
+                if (stagedFilesList.Any())
                 {
                     Console.WriteLine("Changes to be committed:");
                     Console.ForegroundColor = ConsoleColor.DarkGreen;
                     foreach (var item in statuses)
                     {
-                        if ((item.State & (FileStatus.NewInIndex |
-                                        FileStatus.ModifiedInIndex |
-                                        FileStatus.RenamedInIndex |
-                                        FileStatus.DeletedFromIndex)) != 0)
-                        {
-                            Console.WriteLine($"        {item.FilePath}");
-                        }
+                        Console.WriteLine($"        {item.FilePath}");
                     }
                     Console.ResetColor();
                 }
 
-                if (itemStatusesList.Any(s => s.Contains("NewInIndex") ||
-                            s.Contains("ModifiedInWorkdir") ||
-                            s.Contains("RenamedInIndex") ||
-                            s.Contains("DeletedFromIndex")))
+                if (unstagedFilesList.Any())
                 {
                     Console.WriteLine("\nChanges not staged for commit:");
                     Console.WriteLine($"  (use \"git add <file>...\" to update what will be committed)");
                     Console.WriteLine($"  (use \"git restore <file>...\" to discard changes in working directory)");
                     Console.ForegroundColor = ConsoleColor.DarkRed;
-                    foreach (var item in statuses)
+                    foreach (var item in unstagedFilesList)
                     {
-                        if ((item.State & FileStatus.ModifiedInWorkdir) != 0)
-                        {
-                            Console.WriteLine($"        modified:   {item.FilePath}");
-                        }
+                        Console.WriteLine($"        modified:   {item.FilePath}");
                     }
                     Console.ResetColor();
                     Console.WriteLine();
-                    Console.WriteLine("no changes added to commit (use \"git add\" and/or \"git commit -a\")");
+                    Console.WriteLine("no changes added to commit (use \"sharpgit add\" and/or \"sharpgit commit -a\")");
                 }
 
-                if (itemStatusesList.Any(s => s.Contains("NewInWorkdir")))
+                if (untrackedFilesList.Any())
                 {
                     Console.WriteLine("Untracked files:");
-                    Console.WriteLine($"  (use \"git add <file>...\" to include in what will be committed)");
+                    Console.WriteLine($"  (use \"sharpgit add <file>...\" to include in what will be committed)");
                     Console.ForegroundColor = ConsoleColor.Red;
-                    foreach (var item in statuses)
+                    foreach (var item in untrackedFilesList)
                     {
-                        if ((item.State & FileStatus.NewInWorkdir) != 0)
-                        {
-                            Console.WriteLine($"        {item.FilePath}");
-                        }
+                        Console.WriteLine($"        {item.FilePath}");
                     }
                     Console.ResetColor();
                     Console.WriteLine();
                 }
-                if (!itemStatusesList.Any(s =>
-                            s.Contains("NewInIndex") ||
-                            s.Contains("ModifiedInIndex") ||
-                            s.Contains("RenamedInIndex") ||
-                            s.Contains("DeletedFromIndex") ||
-                            s.Contains("ModifiedInWorkdir") ||
-                            s.Contains("NewInWorkdir")))
+                if (!stagedFilesList.Any() && !unstagedFilesList.Any() && untrackedFilesList.Any())
                 {
                     Console.WriteLine("nothing to commit, working tree clean");
                 }
