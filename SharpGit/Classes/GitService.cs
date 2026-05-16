@@ -160,9 +160,6 @@ namespace SharpGit.Classes
             }
         }
 
-        //TODO: Muista jotain Refactoringering.
-        // Good luck.
-        //
         public static GitResult CloneRepo(string remotePath, string? givenPath = null)
         {
             var directoryName = remotePath.TrimEnd('/').Split('/').Last();
@@ -264,24 +261,6 @@ namespace SharpGit.Classes
             }
         }
 
-        //NOTE: Refactoring things.
-        // To take the items into their own lists:
-        // -To be committed
-        // -Changes
-        // -So on
-
-        //NOTE: 2
-        // To use the itemstate bitmask and not to convert it to string
-        //                     itemStatusesList.Add(item.State.ToString());
-        // Not like that.
-        //
-        // But like this:
-        //                         if ((item.State & FileStatus.NewInWorkdir) != 0)
-        // And not like this:
-        //                         if (itemStatusesList.Any(s => s.Contains("NewInIndex") ||
-
-
-        // TODO VÄRIT PUUTTUU
         public static GitResult DisplayGitStatus(Repository repo)
         {
             try
@@ -318,20 +297,15 @@ namespace SharpGit.Classes
                         stagedFilesList.Add(item);
                     if ((item.State & FileStatus.ModifiedInWorkdir) != 0)
                         unstagedFilesList.Add(item);
-                    if ((item.State & FileStatus.NewInWorkdir) != 0 && (item.State & FileStatus.Ignored) == 0)
+                    if ((item.State & FileStatus.NewInWorkdir) != 0)
                         untrackedFilesList.Add(item);
                 }
-                foreach (var item in untrackedFilesList)
-                {
-                    Console.WriteLine(item.State + " " + item.FilePath);
-                    Console.WriteLine("Is this not even called?");
-                }
-                // Changes to be committed (staged files)
+
                 if (stagedFilesList.Any())
                 {
                     Console.WriteLine("Changes to be committed:");
                     Console.ForegroundColor = ConsoleColor.DarkGreen;
-                    foreach (var item in statuses)
+                    foreach (var item in stagedFilesList)
                     {
                         Console.WriteLine($"        {item.FilePath}");
                     }
