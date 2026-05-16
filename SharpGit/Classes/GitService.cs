@@ -160,6 +160,9 @@ namespace SharpGit.Classes
             }
         }
 
+        //TODO: Muista jotain Refactoringering.
+        // Good luck.
+        //
         public static GitResult CloneRepo(string remotePath, string? givenPath = null)
         {
             var directoryName = remotePath.TrimEnd('/').Split('/').Last();
@@ -219,7 +222,6 @@ namespace SharpGit.Classes
                 {
                     FetchOptions = new FetchOptions
                     {
-                        // Muista lisätä tänne ssh avain hommat ja muut
                     }
                 };
                 var (name, email) = GitUtils.GetUserFromLocalRepo(repo);
@@ -262,6 +264,23 @@ namespace SharpGit.Classes
             }
         }
 
+        //NOTE: Refactoring things.
+        // To take the items into their own lists:
+        // -To be committed
+        // -Changes
+        // -So on
+
+        //NOTE: 2
+        // To use the itemstate bitmask and not to convert it to string
+        //                     itemStatusesList.Add(item.State.ToString());
+        // Not like that.
+        //
+        // But like this:
+        //                         if ((item.State & FileStatus.NewInWorkdir) != 0)
+        // And not like this:
+        //                         if (itemStatusesList.Any(s => s.Contains("NewInIndex") ||
+
+
         // TODO VÄRIT PUUTTUU
         public static GitResult DisplayGitStatus(Repository repo)
         {
@@ -298,8 +317,8 @@ namespace SharpGit.Classes
                             s.Contains("RenamedInIndex") ||
                             s.Contains("DeletedFromIndex")))
                 {
-                    Console.WriteLine("\nChanges to be committed:");
-
+                    Console.WriteLine("Changes to be committed:");
+                    Console.ForegroundColor = ConsoleColor.DarkGreen;
                     foreach (var item in statuses)
                     {
                         if ((item.State & (FileStatus.NewInIndex |
@@ -310,6 +329,7 @@ namespace SharpGit.Classes
                             Console.WriteLine($"        {item.FilePath}");
                         }
                     }
+                    Console.ResetColor();
                 }
 
                 if (itemStatusesList.Any(s => s.Contains("NewInIndex") ||
@@ -320,6 +340,7 @@ namespace SharpGit.Classes
                     Console.WriteLine("\nChanges not staged for commit:");
                     Console.WriteLine($"  (use \"git add <file>...\" to update what will be committed)");
                     Console.WriteLine($"  (use \"git restore <file>...\" to discard changes in working directory)");
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
                     foreach (var item in statuses)
                     {
                         if ((item.State & FileStatus.ModifiedInWorkdir) != 0)
@@ -327,6 +348,7 @@ namespace SharpGit.Classes
                             Console.WriteLine($"        modified:   {item.FilePath}");
                         }
                     }
+                    Console.ResetColor();
                     Console.WriteLine();
                     Console.WriteLine("no changes added to commit (use \"git add\" and/or \"git commit -a\")");
                 }
@@ -335,6 +357,7 @@ namespace SharpGit.Classes
                 {
                     Console.WriteLine("Untracked files:");
                     Console.WriteLine($"  (use \"git add <file>...\" to include in what will be committed)");
+                    Console.ForegroundColor = ConsoleColor.Red;
                     foreach (var item in statuses)
                     {
                         if ((item.State & FileStatus.NewInWorkdir) != 0)
@@ -342,6 +365,7 @@ namespace SharpGit.Classes
                             Console.WriteLine($"        {item.FilePath}");
                         }
                     }
+                    Console.ResetColor();
                     Console.WriteLine();
                 }
                 if (!itemStatusesList.Any(s =>
