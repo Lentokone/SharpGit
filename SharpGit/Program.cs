@@ -88,24 +88,36 @@ class Program
         var restoreCommand = new Command("restore", "Restore working tree file");
         var restorePathArg = new Argument<string>("path", "Path to file");
 
+        var restoreOption = new Option<bool>(
+                name: "--staged",
+                description: "Restore staged changes"
+                );
+        restoreCommand.AddOption(restoreOption);
         restoreCommand.AddArgument(restorePathArg);
-        restoreCommand.SetHandler((string path) =>
-                {
-                    var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
-                    if (repo == null)
-                    {
-                        Environment.Exit(1);
-                    }
-                    var result = GitService.RestoreFile(repo, path);
-
-                    if (!result.Success)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine(result.Message);
-                        Console.ResetColor();
-                        Environment.Exit(1);
-                    }
-                }, restorePathArg);
+        restoreCommand.SetHandler((string path, bool staged) =>
+        {
+            var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
+            var result = new GitResult();
+            if (repo == null)
+            {
+                Environment.Exit(1);
+            }
+            if (staged)
+            {
+                result = GitService.RestoreFileStaged(repo, path);
+            }
+            else
+            {
+                result = GitService.RestoreFileInWorkdir(repo, path);
+            }
+            if (!result.Success)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(result.Message);
+                Console.ResetColor();
+                Environment.Exit(1);
+            }
+        }, restorePathArg, restoreOption);
         // remove
         var removeCommand = new Command("remove", "Remove tracked object");
         var removePathArg = new Argument<string>("path", "Path to file or directory");

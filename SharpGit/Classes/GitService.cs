@@ -161,38 +161,25 @@ namespace SharpGit.Classes
             }
         }
 
-        // Unfinished
-        // Currently does nothing wanted
-        // Just a copy of the earlier restore function
         public static GitResult RestoreFileStaged(Repository repo, string filePath)
         {
             try
             {
-                var entry = repo.Index[filePath];
-                var entry2 = repo.Head.Tip[filePath];
-                if (entry == null)
-                {
-                    return GitResult.Fail($"File '{filePath}' not found in index.");
-                }
+                var commit = repo.Head.Tip;
+                if (commit == null)
+                    return GitResult.Fail("No HEAD commit found.");
 
-                var blob = repo.Lookup<Blob>(entry.Id);
+                var treeEntry = commit.Tree[filePath];
+                if (treeEntry == null)
+                    return GitResult.Fail($"File '{filePath}' not found in HEAD.");
 
-                if (blob == null)
-                {
-                    return GitResult.Fail($"Blob for '{filePath}' not found.");
-                }
+                if (treeEntry.TargetType != TreeEntryTargetType.Blob)
+                    return GitResult.Fail($"'{filePath}' is not a file.");
 
-                var fullPath = Path.Combine(repo.Info.WorkingDirectory, filePath);
+                var blob = (Blob)treeEntry.Target;
 
-                var directory = Path.GetDirectoryName(fullPath);
-                if (!string.IsNullOrEmpty(directory))
-                {
-                    Directory.CreateDirectory(directory);
-                }
-
-                using var content = blob.GetContentStream();
-                using var file = File.Create(fullPath);
-                content.CopyTo(file);
+                repo.Index.Add(blob, filePath, Mode.NonExecutableFile);
+                repo.Index.Write();
 
                 return GitResult.Ok();
             }
@@ -383,6 +370,7 @@ namespace SharpGit.Classes
                 if (stagedFilesList.Any())
                 {
                     Console.WriteLine("Changes to be committed:");
+                    Console.WriteLine($"    (use \"sharpgit restore --staged <file>...\" to unstage)");
                     Console.ForegroundColor = ConsoleColor.DarkGreen;
                     foreach (var item in stagedFilesList)
                     {
@@ -394,8 +382,8 @@ namespace SharpGit.Classes
                 if (unstagedFilesList.Any())
                 {
                     Console.WriteLine("\nChanges not staged for commit:");
-                    Console.WriteLine($"  (use \"git add <file>...\" to update what will be committed)");
-                    Console.WriteLine($"  (use \"git restore <file>...\" to discard changes in working directory)");
+                    Console.WriteLine($"  (use \"sharpgit add <file>...\" to update what will be committed)");
+                    Console.WriteLine($"  (use \"sharpgit restore <file>...\" to discard changes in working directory)");
                     Console.ForegroundColor = ConsoleColor.DarkRed;
                     foreach (var item in unstagedFilesList)
                     {
@@ -403,7 +391,6 @@ namespace SharpGit.Classes
                     }
                     Console.ResetColor();
                     Console.WriteLine();
-                    // Console.WriteLine("no changes added to commit (use \"sharpgit add\" and/or \"sharpgit commit -a\")");
                 }
 
                 if (untrackedFilesList.Any())
