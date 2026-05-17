@@ -123,6 +123,85 @@ namespace SharpGit.Classes
             }
         }
 
+        public static GitResult RestoreFileInWorkdir(Repository repo, string filePath)
+        {
+            try
+            {
+                var entry = repo.Index[filePath];
+
+                if (entry == null)
+                {
+                    return GitResult.Fail($"File '{filePath}' not found in index.");
+                }
+
+                var blob = repo.Lookup<Blob>(entry.Id);
+
+                if (blob == null)
+                {
+                    return GitResult.Fail($"Blob for '{filePath}' not found.");
+                }
+
+                var fullPath = Path.Combine(repo.Info.WorkingDirectory, filePath);
+
+                var directory = Path.GetDirectoryName(fullPath);
+                if (!string.IsNullOrEmpty(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                using var content = blob.GetContentStream();
+                using var file = File.Create(fullPath);
+                content.CopyTo(file);
+
+                return GitResult.Ok();
+            }
+            catch (Exception ex)
+            {
+                return GitResult.Fail($"Failed to restore file: {filePath}", ex);
+            }
+        }
+
+        // Unfinished
+        // Currently does nothing wanted
+        // Just a copy of the earlier restore function
+        public static GitResult RestoreFileStaged(Repository repo, string filePath)
+        {
+            try
+            {
+                var entry = repo.Index[filePath];
+                var entry2 = repo.Head.Tip[filePath];
+                if (entry == null)
+                {
+                    return GitResult.Fail($"File '{filePath}' not found in index.");
+                }
+
+                var blob = repo.Lookup<Blob>(entry.Id);
+
+                if (blob == null)
+                {
+                    return GitResult.Fail($"Blob for '{filePath}' not found.");
+                }
+
+                var fullPath = Path.Combine(repo.Info.WorkingDirectory, filePath);
+
+                var directory = Path.GetDirectoryName(fullPath);
+                if (!string.IsNullOrEmpty(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                using var content = blob.GetContentStream();
+                using var file = File.Create(fullPath);
+                content.CopyTo(file);
+
+                return GitResult.Ok();
+            }
+            catch (Exception ex)
+            {
+                return GitResult.Fail($"Failed to restore file: {filePath}", ex);
+            }
+        }
+
         public static GitResult RemoveFromRepo(Repository repo, string filePath)
         {
             try
@@ -307,7 +386,7 @@ namespace SharpGit.Classes
                     Console.ForegroundColor = ConsoleColor.DarkGreen;
                     foreach (var item in stagedFilesList)
                     {
-                        Console.WriteLine($"        {item.FilePath}");
+                        Console.WriteLine($"        modified:   {item.FilePath}");
                     }
                     Console.ResetColor();
                 }
@@ -324,7 +403,7 @@ namespace SharpGit.Classes
                     }
                     Console.ResetColor();
                     Console.WriteLine();
-                    Console.WriteLine("no changes added to commit (use \"sharpgit add\" and/or \"sharpgit commit -a\")");
+                    // Console.WriteLine("no changes added to commit (use \"sharpgit add\" and/or \"sharpgit commit -a\")");
                 }
 
                 if (untrackedFilesList.Any())
@@ -375,8 +454,7 @@ namespace SharpGit.Classes
                 }
                 return GitResult.Ok();
             }
-            catch
-            (Exception ex)
+            catch (Exception ex)
             {
                 return GitResult.Fail("Error retrieving log", ex);
             }

@@ -84,19 +84,48 @@ class Program
             }
         }, updateOption, allOption, addPathArg);
 
+        // restore
+        var restoreCommand = new Command("restore", "Restore working tree file");
+        var restorePathArg = new Argument<string>("path", "Path to file");
+
+        restoreCommand.AddArgument(restorePathArg);
+        restoreCommand.SetHandler((string path) =>
+                {
+                    var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
+                    if (repo == null)
+                    {
+                        Environment.Exit(1);
+                    }
+                    var result = GitService.RestoreFile(repo, path);
+
+                    if (!result.Success)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine(result.Message);
+                        Console.ResetColor();
+                        Environment.Exit(1);
+                    }
+                }, restorePathArg);
         // remove
         var removeCommand = new Command("remove", "Remove tracked object");
-        var removePathArg = new Argument<IEnumerable<string>>("path", "Path to file or directory");
+        var removePathArg = new Argument<string>("path", "Path to file or directory");
 
         removeCommand.AddArgument(addPathArg);
-        removeCommand.SetHandler((IEnumerable<string> path) =>
+        removeCommand.SetHandler((string path) =>
         {
             var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
             if (repo == null)
             {
                 Environment.Exit(1);
             }
-
+            var result = GitService.RemoveFromRepo(repo, path);
+            if (!result.Success)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(result.Message);
+                Console.ResetColor();
+                Environment.Exit(1);
+            }
         }, removePathArg);
 
 
@@ -254,6 +283,7 @@ class Program
         rootCommand.AddCommand(initCommand);
         rootCommand.AddCommand(loginCommand);
         rootCommand.AddCommand(addCommand);
+        rootCommand.AddCommand(restoreCommand);
         rootCommand.AddCommand(removeCommand);
         rootCommand.AddCommand(commitCommand);
         rootCommand.AddCommand(cloneCommand);
