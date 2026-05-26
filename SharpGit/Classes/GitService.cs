@@ -43,7 +43,8 @@ namespace SharpGit.Classes
             try
             {
                 var config = GitUtils.GetConfig();
-                var loginAddress = config.ServerAddress.TrimEnd('/') + "/cli/login";
+                // var loginAddress = config.ServerAddress.TrimEnd('/') + "/api/cli/auth/login";
+                var loginAddress = "http://127.0.0.1:5227" + "/api/cli/auth/login";
 
                 if (!GitUtils.HasSSHKey())
                     GitUtils.SSHKeyGeneration();
@@ -53,6 +54,7 @@ namespace SharpGit.Classes
                     password,
                     sshkey = GitUtils.GetSSHKey()
                 };
+                Console.WriteLine(loginAddress);
                 using var client = new HttpClient();
                 {
                     var response = await client.PostAsJsonAsync(loginAddress, payload);
@@ -62,9 +64,9 @@ namespace SharpGit.Classes
                         Console.WriteLine("Login failed");
                         return;
                     }
+                    Console.WriteLine(response.Content.ToString());
                 }
                 GitUtils.UpdateLocalConfig(username, email);
-
                 Console.WriteLine("Initial setup successful!");
             }
             catch (Exception ex)
