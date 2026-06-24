@@ -54,17 +54,15 @@ namespace SharpGit.Classes
                     password,
                     sshkey = GitUtils.GetSSHKey()
                 };
-                Console.WriteLine(loginAddress);
                 using var client = new HttpClient();
                 {
                     var response = await client.PostAsJsonAsync(loginAddress, payload);
-
+                    string body = await response.Content.ReadAsStringAsync();
                     if (!response.IsSuccessStatusCode)
                     {
-                        Console.WriteLine("Login failed");
+                        Console.WriteLine("Login failed. " + body);
                         return;
                     }
-                    Console.WriteLine(response.Content.ToString());
                 }
                 GitUtils.UpdateLocalConfig(username, email);
                 Console.WriteLine("Initial setup successful!");
