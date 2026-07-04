@@ -1,13 +1,5 @@
-﻿using System;
-using System.Threading.Tasks;
-using System.CommandLine;
+﻿using System.CommandLine;
 using SharpGit.Classes;
-
-////! Eli se libgit2sharp
-////! Ja ssh
-////! Ja auth tarkistus mvc puolelle
-
-//TODO Muista ottaa nuo writelinet pois
 
 namespace SharpGit;
 
@@ -17,7 +9,7 @@ class Program
     {
         var rootCommand = new RootCommand("SharpGit CLI - a minimal git-like tool");
 
-        // Refactor name and something to be more reasonable
+        // login
         var loginCommand = new Command("login", "name is temporary for now!!!!");
         loginCommand.SetHandler(async () =>
         {
@@ -140,7 +132,6 @@ class Program
             }
         }, removePathArg);
 
-
         // commit
         var commitCommand = new Command("commit", "Record changes to the repository");
         var messageOption = new Option<string>(
@@ -152,7 +143,6 @@ class Program
         commitCommand.SetHandler((string message) =>
         {
             Console.WriteLine($"Commit command called with message: {message}");
-
             var repo = GitUtils.TryFindRepositoryFromCurrentDirectory();
             if (repo == null)
             {
@@ -171,7 +161,6 @@ class Program
         }, messageOption);
 
         // clone
-        // KESKEN
         var cloneCommand = new Command("clone", "Clone a repository");
         var repoUrlArg = new Argument<string>("url", "Repository URL");
         var targetDirArg = new Argument<string?>("path", () => null, "Target directory (optional)");

@@ -14,12 +14,6 @@ namespace SharpGit.Classes
             Console.WriteLine($"Initialized empty Git repository in {repoPath}");
         }
 
-        //
-        // Push through
-        //
-        //No en tiiä
-        //Ehkä Refactor tästä initial setup / joku muu funktio kun login
-        //koska tää tekee jo aika paljon muuta kun vain login
         public static async Task Login()
         {
             Console.WriteLine("LOGIN");
@@ -43,8 +37,7 @@ namespace SharpGit.Classes
             try
             {
                 var config = GitUtils.GetConfig();
-                // var loginAddress = config.ServerAddress.TrimEnd('/') + "/api/cli/auth/login";
-                var loginAddress = "http://127.0.0.1:5227" + "/api/cli/auth/login";
+                var loginAddress = config.ServerAddress.TrimEnd('/') + "/api/cli/auth/login";
 
                 if (!GitUtils.HasSSHKey())
                     GitUtils.SSHKeyGeneration();
